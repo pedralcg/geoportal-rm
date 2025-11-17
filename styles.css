@@ -1,0 +1,813 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* Paleta Minimalista y moderna */
+  --primary-blue: #3b82f6; /* Acento Principal */
+  --primary-blue-dark: #2563eb;
+  --gray-50: #fcfcfc; /* Fondo de paneles y sidebar (más limpio) */
+  --gray-100: #ededed; /* Fondo Principal muy suave */
+  --gray-200: #e4e4e7;
+  --gray-300: #d4d4d8;
+  --gray-400: #a1a1aa;
+  --gray-700: #3f3f46;
+  --gray-900: #18181b; /* Texto de alto contraste */
+  --white: #ffffff;
+  --success: #10b981;
+  --error: #ef4444;
+
+  --font-family: "Inter", sans-serif;
+  --header-height: 4rem; /* Más alto para un look moderno */
+  --sidebar-width: 350px; /* AUMENTADO A 350px */
+  --border-radius: 0.75rem; /* Más redondeado y moderno */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -4px rgba(0, 0, 0, 0.05); /* Sombra suave y sutil */
+  --transition: all 0.3s ease-in-out; /* Transición más lenta y suave */
+}
+
+body {
+  font-family: var(--font-family);
+  color: var(--gray-700);
+  background: var(--gray-100);
+  overflow: hidden;
+}
+
+/* --- ENCABEZADO --- */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--header-height);
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-200);
+  color: var(--gray-900);
+  z-index: 1000;
+  box-shadow: var(--shadow-sm); /* Sombra más sutil */
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+  padding: 0 1.5rem;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* Aumentado el espacio */
+  flex-shrink: 0;
+  margin-right: 1.5rem;
+}
+
+.logo i {
+  font-size: 1.5rem; /* Icono más grande */
+  color: var(--primary-blue-dark);
+}
+
+.logo h1 {
+  font-size: 1.25rem; /* Título más grande */
+  font-weight: 700;
+  letter-spacing: 0.05em; /* Menos espaciado para mejor legibilidad */
+  color: var(--gray-900);
+}
+
+.search-container {
+  /* ¡CLAVE CORREGIDA! Crece para ocupar todo el espacio libre */
+  flex-grow: 1;
+  position: relative;
+  min-width: 250px;
+  /* El botón de contacto ya no está, se elimina el margen */
+  margin-right: 0;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  background: var(--white);
+  color: var(--gray-700);
+  font-size: 0.95rem;
+  box-shadow: none; /* Eliminar sombras internas */
+  transition: var(--transition);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.search-results {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  right: 0;
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1001;
+  display: none;
+}
+
+.search-results.show {
+  display: block;
+}
+
+.search-results div {
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.search-results div:hover {
+  background: var(--gray-100);
+}
+
+/* El estilo original .btn-contact ya no se usa, lo ocultamos o eliminamos si no hay más usos */
+.btn-contact {
+  display: none !important;
+}
+
+/* ELIMINACIÓN DE ESTILOS DE DROPDOWN ANTIGUOS */
+.contact-toggle-btn {
+  display: none !important;
+}
+.contact-dropdown {
+  display: none !important;
+}
+
+/* --- ESTILOS DE MODAL (POPUP) - NUEVA IMPLEMENTACIÓN --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7); /* Fondo oscuro semitransparente */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  opacity: 0; /* Oculto por defecto */
+  visibility: hidden;
+  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+  z-index: 9999;
+}
+
+.modal-overlay.active {
+  opacity: 1; /* Muestra el overlay */
+  visibility: visible;
+}
+
+.modal-content {
+  background-color: var(--white);
+  padding: 0; /* padding se aplica internamente */
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  max-width: 400px; /* Ancho fijo para el modal */
+  width: 90%;
+  transform: translateY(-50px); /* Efecto de entrada */
+  transition: transform 0.3s var(--transition);
+  overflow: hidden;
+}
+
+.modal-overlay.active .modal-content {
+  transform: translateY(0); /* Vuelve a la posición central al activarse */
+}
+
+.contact-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: var(--primary-blue);
+  color: var(--white);
+  box-shadow: var(--shadow-sm);
+}
+
+.contact-header h3,
+.contact-header i {
+  color: var(--white);
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.contact-info-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.contact-info-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--gray-200);
+  font-size: 0.9rem;
+  color: var(--gray-700);
+}
+
+.contact-info-list li:last-child {
+  border-bottom: none;
+}
+/* --- FIN ESTILOS DE MODAL --- */
+
+/* --- CONTENEDOR PRINCIPAL: Ajuste de Altura --- */
+.main-container {
+  display: flex;
+  height: calc(100vh - var(--header-height));
+  margin-top: var(--header-height);
+  position: relative;
+}
+
+/* --- BARRAS LATERALES --- */
+.sidebar {
+  width: var(--sidebar-width); /* Aumentado en :root */
+  background: var(--gray-50);
+  overflow-y: auto;
+  padding: 1rem;
+  z-index: 100;
+  border-right: 1px solid var(--gray-200);
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Configuración de la barra DERECHA (anotacione) */
+.right-sidebar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  transform: translateX(100%); /* Oculta por defecto */
+  z-index: 500;
+  border-left: 1px solid var(--gray-200);
+  border-right: none;
+  box-shadow: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  width: var(--sidebar-width); /* Usamos la misma variable para ambos */
+}
+
+.right-sidebar.expanded {
+  transform: translateX(0); /* Muestra la barra */
+  box-shadow: var(--shadow); /* Sombra moderna al expandir */
+}
+
+.anotacion-panel-body {
+  padding: 1rem;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.anotacion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: var(--primary-blue);
+  color: var(--white);
+  border-bottom: none;
+  cursor: default;
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+}
+.anotacion-header h3,
+.anotacion-header i {
+  color: var(--white);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: var(--white);
+  font-size: 1.2rem;
+  cursor: pointer;
+  opacity: 0.8;
+  padding: 0.5rem;
+  transition: opacity 0.2s;
+}
+.close-btn:hover {
+  opacity: 1;
+}
+
+/* --- BOTÓN DE anotacionE DENTRO DEL SIDEBAR IZQUIERDO (Botón primario) --- */
+.btn-anotacion-toggle {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: var(--primary-blue);
+  color: var(--white);
+  border: none;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: var(--transition);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+}
+
+.btn-anotacion-toggle:hover {
+  background: var(--primary-blue-dark);
+  box-shadow: var(--shadow);
+}
+
+/* --- NUEVO BOTÓN DE CONTACTO EN SIDEBAR (Botón secundario) --- */
+.btn-contact-sidebar {
+  margin-top: 0.5rem; /* Menor separación del botón de anotacione */
+  padding: 0.75rem;
+  background: var(--gray-300); /* Color secundario para diferenciarlo */
+  color: var(--gray-900);
+  border: none;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: var(--transition);
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+}
+
+.btn-contact-sidebar:hover {
+  background: var(--gray-400);
+  box-shadow: var(--shadow);
+}
+
+/* --- MAPA Y ESTATUS --- */
+.map-container {
+  flex: 1;
+  position: relative;
+  transition: margin-right 0.3s ease-in-out;
+}
+
+#map {
+  height: 100%;
+}
+
+.map-picking {
+  cursor: crosshair !important;
+}
+
+/* Estilo para los iconos de anotaciones para asegurar que se vean correctamente */
+.custom-anotacion-icon {
+  background: none !important;
+  border: none !important;
+  text-align: center;
+}
+.custom-anotacion-icon i {
+  display: block;
+}
+
+.anotacion-marker-icon {
+  background: none !important;
+  border: none !important;
+}
+
+/* --- PANELES: Diseño plano y minimalista --- */
+.panel {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  border-radius: var(--border-radius);
+  margin-bottom: 1rem;
+  box-shadow: none; /* Eliminar sombras para un look más plano */
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem 1rem; /* Más espacio */
+  background: var(--gray-50);
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.panel-header i {
+  color: var(--primary-blue);
+  font-size: 1rem;
+}
+
+.panel-header h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--gray-900);
+  text-transform: uppercase;
+  letter-spacing: 0.02em; /* Menos espaciado para un look más sutil */
+}
+
+.panel-body {
+  padding: 1rem;
+}
+
+/* --- FORMULARIOS Y BOTONES (Minimalistas) --- */
+.anotacion-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.form-group {
+  margin-bottom: 0.5rem;
+}
+
+.form-group label {
+  font-weight: 500;
+  font-size: 0.9rem; /* Ligeramente más grande */
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+.required {
+  color: var(--error);
+}
+
+.form-input,
+.form-select,
+.form-textarea,
+.coord-input,
+.basemap-select {
+  width: 100%;
+  padding: 0.7rem 0.75rem; /* Más padding */
+  border: 1px solid var(--gray-300);
+  border-radius: var(--border-radius);
+  font-size: 0.9rem;
+  box-shadow: none;
+  background: var(--white);
+  transition: border-color 0.2s;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus,
+.coord-input:focus,
+.basemap-select:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px; /* Altura mínima aumentada */
+}
+
+.coords-container {
+  padding: 0.75rem;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--border-radius);
+  background: var(--gray-50);
+}
+
+.coords-display {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--gray-300);
+  border-radius: 0.3rem;
+  font-size: 0.9rem;
+  background: var(--white);
+  margin-bottom: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+}
+
+.coords-display.selected {
+  background: var(--primary-blue-dark);
+  border-color: var(--primary-blue-dark);
+  color: var(--white);
+}
+
+.coords-actions {
+  margin-bottom: 0.75rem;
+}
+
+.coords-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.btn {
+  padding: 0.7rem 1.25rem;
+  border-radius: var(--border-radius);
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  width: 100%;
+}
+
+.btn-map {
+  background: var(--primary-blue);
+  color: var(--white);
+}
+.btn-map.active-picking {
+  background: var(--primary-blue-dark);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
+}
+.btn-map:hover {
+  background: var(--primary-blue-dark);
+}
+
+.btn-set {
+  padding: 0.7rem 0.75rem;
+  background: var(--gray-700);
+  color: var(--white);
+  width: auto;
+}
+.btn-set:hover {
+  background: var(--gray-900);
+}
+
+.btn-send {
+  background: var(--primary-blue);
+  font-weight: 600;
+  padding: 0.9rem;
+  margin-top: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-send:hover {
+  background: var(--primary-blue-dark);
+  box-shadow: var(--shadow);
+}
+.btn-send:disabled {
+  background: var(--gray-400);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* --- CAPAS (Selectores más pequeños y limpios) --- */
+.layers-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.layer-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.25rem;
+  border-bottom: 1px solid var(--gray-100);
+  transition: background-color 0.2s;
+  position: relative; /* Necesario para que .layer-right se posicione bien */
+}
+
+.layer-item:last-child {
+  border-bottom: none;
+}
+
+.layer-item:hover {
+  background: var(--gray-100);
+}
+
+.layer-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.layer-right {
+  display: flex;
+  align-items: center;
+  gap: 8px; /* Espacio entre el botón de colapso y el switch */
+}
+
+.layer-badge {
+  width: auto;
+  height: auto;
+  border: none;
+  font-size: 1em;
+}
+
+.layer-label {
+  font-size: 0.9rem;
+  font-weight: 400;
+}
+
+/* --- ESTILOS DE COLAPSO (LEYENDA DE ANOTACIONES) --- */
+
+.collapse-btn {
+  background: none;
+  border: none;
+  color: var(--gray-700);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0;
+  margin-right: 5px; /* Separación del switch */
+  transition: all 0.2s;
+}
+
+.legend-container {
+  overflow: hidden;
+  max-height: 500px; /* Altura máxima para animación de expansión */
+  opacity: 1;
+  transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out;
+}
+
+.legend-container.collapsed {
+  max-height: 0; /* Colapsa la altura */
+  opacity: 0;
+  padding: 0;
+}
+
+/* --- LEYENDA DE ANOTACIONES (Contenido dentro del container) --- */
+
+.layer-legend-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px; /* Espacio entre los ítems */
+  padding: 8px 15px 15px; /* Padding para separarlo del toggle */
+  border-top: 1px solid var(--gray-200);
+  margin-top: -1px; /* Para que el borde se solape con el anterior */
+  background: var(--gray-50); /* Fondo sutil para agrupar */
+  border-radius: 0 0 var(--border-radius) var(--border-radius);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  color: var(--gray-700);
+  min-width: 45%; /* Dos columnas */
+}
+
+.legend-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Toggle Switch: Ajustar a tamaño más pequeño */
+.layer-switch {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.layer-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.layer-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--gray-300);
+  transition: 0.4s;
+  border-radius: 20px;
+}
+
+.layer-slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .layer-slider {
+  background-color: var(--primary-blue);
+}
+
+input:checked + .layer-slider:before {
+  transform: translateX(16px);
+}
+
+/* --- ESTATUS (NUEVA POSICIÓN: Encima del Mapa) --- */
+.status-panel {
+  /* Cambio clave: Flota sobre el mapa */
+  position: absolute;
+  top: 1rem; /* Margen superior */
+  left: 50%; /* Centrar horizontalmente */
+  transform: translateX(-50%); /* Ajuste de centrado */
+
+  z-index: 1000;
+  padding: 0.75rem 1.25rem; /* Ajuste de padding */
+  border-radius: var(--border-radius);
+  color: var(--white);
+  box-shadow: var(--shadow);
+  display: none;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  transition: opacity 0.3s, transform 0.3s ease-out; /* Agregar transición para efecto */
+  max-width: 450px; /* Ancho máximo para mejor legibilidad */
+  width: auto; /* Ajustar el ancho al contenido */
+  opacity: 0; /* Iniciar oculto para la animación */
+}
+
+.status-panel.show {
+  display: flex;
+  opacity: 1; /* Mostrar con fade-in */
+  /* No necesitamos el efecto de `position: static` ni `bottom: 0` */
+}
+
+.status-panel.success {
+  background: var(--success);
+}
+
+.status-panel.error {
+  background: var(--error);
+}
+
+.status-panel.warning {
+  background: #f59e0b;
+}
+
+.status-panel.info {
+  background: var(--primary-blue);
+}
+
+/* Ajustes responsivos para minimalismo */
+@media (max-width: 1024px) {
+  /* Header se vuelve más compacto y se envuelve */
+  .header-content {
+    flex-wrap: wrap;
+    padding: 0.75rem 1rem;
+    height: auto;
+  }
+  .header {
+    height: auto;
+  }
+  .search-container {
+    order: 3;
+    width: 100%;
+    margin-top: 0.75rem;
+  }
+  /* El botón de contacto ya no está en el header, estos estilos se anulan */
+  .btn-contact {
+    margin-left: 0.5rem;
+    padding: 0.5rem 1rem;
+  }
+  .main-container {
+    height: calc(100vh - 7.5rem); /* Ajustar altura para el header más alto */
+    margin-top: 7.5rem;
+  }
+
+  /* La barra DERECHA (anotacione) se desliza desde abajo en móvil */
+  .right-sidebar {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    top: unset;
+    width: 100%;
+    height: 85vh; /* Ocupa más altura en móvil */
+    max-height: 85vh;
+    transform: translateY(100%);
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    border-left: none;
+    border-top: 1px solid var(--gray-200);
+    box-shadow: var(--shadow);
+  }
+  .right-sidebar.expanded {
+    transform: translateY(0);
+  }
+
+  .map-container {
+    margin-right: 0 !important;
+  }
+}
