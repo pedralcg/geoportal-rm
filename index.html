@@ -3,7 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Geoportal Ambiental de la Región de Murcia - Visualización y gestión de datos ambientales"
+    />
     <title>Geoportal Ambiental RM</title>
+
+    <!-- Estilos externos -->
     <link
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -12,207 +18,201 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
     <link rel="stylesheet" href="styles.css" />
   </head>
+
   <body>
-    <header class="header">
-      <div class="header-content">
-        <div class="logo">
-          <i class="fas fa-mountain"></i>
-          <h1>GEOPORTAL AMBIENTAL RM</h1>
-        </div>
-        <div class="search-container">
-          <input
-            type="text"
-            id="search-input"
-            placeholder="Buscar barrio o punto de interés..."
-            class="search-input"
-          />
-          <div id="search-results" class="search-results"></div>
-        </div>
+    <!-- Header Principal -->
+    <header>
+      <h1>🌿 Geoportal Ambiental RM</h1>
+
+      <div class="search-container">
+        <i class="fas fa-search search-icon"></i>
+        <input
+          type="text"
+          id="search-input"
+          placeholder="Buscar municipio..."
+          class="search-input"
+          autocomplete="off"
+        />
+        <div id="search-results" class="search-results"></div>
       </div>
     </header>
 
-    <div class="main-container">
-      <aside class="sidebar" id="left-sidebar">
-        <div class="panel">
-          <div class="panel-header">
-            <i class="fas fa-layer-group"></i>
-            <h3>Coberturas</h3>
-          </div>
-          <div class="panel-body">
-            <div id="layers" class="layers-container"></div>
-          </div>
+    <!-- Sidebar Izquierdo -->
+    <aside class="sidebar" id="left-sidebar">
+      <!-- Capas -->
+      <div class="sidebar-header">
+        <h2><i class="fas fa-layer-group"></i> Capas</h2>
+      </div>
+
+      <div class="sidebar-content">
+        <div class="layers-section">
+          <div id="layers" class="layers-container"></div>
         </div>
 
-        <div class="panel">
-          <div class="panel-header">
-            <i class="fas fa-globe-americas"></i>
-            <h3>Mapas Base</h3>
-          </div>
-          <div class="panel-body">
-            <select
-              id="basemap-select"
-              class="form-select basemap-select"
-            ></select>
-          </div>
+        <!-- Mapas Base -->
+        <div class="layers-section">
+          <h3 class="section-title">Mapa Base</h3>
+          <select id="basemap-select" class="form-select"></select>
         </div>
 
-        <button
-          class="btn btn-primary btn-anotacion-toggle"
-          id="toggle-anotacion-sidebar"
-        >
-          <i class="fas fa-exclamation-triangle"></i>
-          Añadir Anotación ****
+        <!-- Herramientas -->
+        <div class="layers-section">
+          <h3 class="section-title">Herramientas</h3>
+          <!-- Funcionalidades avanzadas removidas en MVP -->
+        </div>
+
+        <!-- Acciones Principales -->
+        <button class="btn btn-primary" id="toggle-anotacion-sidebar">
+          <i class="fas fa-map-pin"></i>
+          Añadir Anotación
         </button>
 
-        <button
-          class="btn btn-secondary btn-contact-sidebar"
-          id="toggle-contact"
-        >
+        <button class="btn btn-secondary" id="toggle-contact">
           <i class="fas fa-headset"></i>
-          Contacto y Soporte
+          Contacto
         </button>
-      </aside>
+      </div>
+    </aside>
 
-      <main class="map-container">
-        <div id="map" class="map"></div>
-        <div id="status" class="status-panel"></div>
-      </main>
+    <!-- Mapa Principal -->
+    <main class="map-container">
+      <div id="map"></div>
 
-      <aside class="sidebar right-sidebar" id="right-sidebar">
-        <div class="panel-header anotacion-header">
-          <i class="fas fa-paper-plane"></i>
-          <h3>Añadir anotación</h3>
-          <button class="close-btn" id="close-anotacion-sidebar">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        <div class="panel-body anotacion-panel-body">
-          <form id="anotacion-form" class="anotacion-form">
-            <div class="form-group">
-              <label for="nombre">Nombre <span class="required">*</span></label>
-              <input
-                type="text"
-                id="nombre"
-                class="form-input"
-                placeholder="Tu nombre"
-                required
-              />
+      <!-- Controles del Mapa -->
+      <div class="map-controls">
+        <button
+          class="control-btn"
+          id="btn-clear-filters"
+          title="Limpiar filtros"
+        >
+          <i class="fas fa-eraser"></i>
+        </button>
+
+        <button class="control-btn" id="btn-my-location" title="Mi ubicación">
+          <i class="fas fa-location-arrow"></i>
+        </button>
+
+        <button class="control-btn" id="btn-fit-bounds" title="Vista completa">
+          <i class="fas fa-compress-arrows-alt"></i>
+        </button>
+      </div>
+
+      <!-- Panel de Estado -->
+      <div id="status" class="notification"></div>
+    </main>
+
+    <!-- Sidebar Derecho: Anotaciones -->
+    <aside class="sidebar right-sidebar hidden" id="right-sidebar">
+      <div class="sidebar-header">
+        <h2><i class="fas fa-paper-plane"></i> Añadir Anotación</h2>
+        <button class="btn-icon" id="close-anotacion-sidebar">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="sidebar-content">
+        <form id="anotacion-form">
+          <div class="form-group">
+            <label for="nombre" class="form-label">Nombre *</label>
+            <input
+              type="text"
+              id="nombre"
+              class="form-input"
+              placeholder="Tu nombre"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="tipo" class="form-label">Tipo de Anotación *</label>
+            <select id="tipo" class="form-select" required>
+              <option value="">Seleccione...</option>
+              <option value="riesgo_incendio">🔥 Riesgo de Incendio</option>
+              <option value="plaga_forestal">🐛 Plaga Forestal</option>
+              <option value="inventario_forestal">
+                🌲 Inventario Forestal
+              </option>
+              <option value="fauna">🐾 Fauna Silvestre</option>
+              <option value="punto_control_lidar">
+                📍 Punto Control LiDAR
+              </option>
+              <option value="validacion_datos_gis">🗺️ Validación GIS</option>
+              <option value="otro">⚠️ Otro</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="comentarios" class="form-label">Comentarios *</label>
+            <textarea
+              id="comentarios"
+              class="form-textarea"
+              placeholder="Describe la observación..."
+              required
+            ></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Ubicación *</label>
+
+            <div class="coords-display" id="coords-display-container">
+              <i class="fas fa-crosshairs"></i>
+              <span id="coords-text">No seleccionada</span>
             </div>
 
-            <div class="form-group">
-              <label for="tipo"
-                >Tipo de Anotación <span class="required">*</span></label
-              >
-              <select id="tipo" class="form-select" required>
-                <option value="">Seleccione...</option>
-                <option value="riesgo_incendio">
-                  Riesgo de Incendio Forestal
-                </option>
-                <option value="plaga_forestal">
-                  Detección de Plagas/Enfermedades
-                </option>
-                <option value="inventario_forestal">
-                  Inventario/Censo Forestal (Muestreo)
-                </option>
-                <option value="fauna">
-                  Inventario/Censo de Fauna (Muestreo)
-                </option>
-                <option value="punto_control_lidar">
-                  Punto de Control LiDAR/Dron
-                </option>
-                <option value="validacion_datos_gis">
-                  Validación de Datos GIS/Satélite
-                </option>
-                <option value="otro">Otro</option>
-              </select>
-            </div>
-
-            <div class="form-group">
-              <label for="comentarios"
-                >Comentarios <span class="required">*</span></label
-              >
-              <textarea
-                id="comentarios"
-                class="form-textarea"
-                placeholder="Describe brevemente el problema"
-                required
-              ></textarea>
-            </div>
-
-            <div class="form-group">
-              <label
-                >Ubicación de la anotación
-                <span class="required">*</span></label
-              >
-              <div class="coords-container">
-                <div class="coords-display" id="coords-display-container">
-                  <i class="fas fa-crosshairs"></i>
-                  <span id="coords-text">No seleccionada</span>
-                </div>
-
-                <div class="coords-actions">
-                  <button type="button" id="pick-on-map" class="btn btn-map">
-                    <i class="fas fa-map-pin"></i>
-                    Seleccionar en Mapa
-                  </button>
-                </div>
-
-                <div class="coords-manual">
-                  <div class="coords-inputs">
-                    <input
-                      type="number"
-                      id="lat-input"
-                      placeholder="Latitud"
-                      step="any"
-                      class="coord-input"
-                    />
-                    <input
-                      type="number"
-                      id="lng-input"
-                      placeholder="Longitud"
-                      step="any"
-                      class="coord-input"
-                    />
-                    <button
-                      type="button"
-                      id="set-manual-coords"
-                      class="btn btn-set"
-                    >
-                      <i class="fas fa-check"></i>
-                      Fijar
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <button type="button" id="anotacion-send" class="btn btn-send">
-              <i class="fas fa-share-square"></i>
-              Enviar Anotación
+            <button type="button" id="pick-on-map" class="btn btn-secondary">
+              <i class="fas fa-map-marker-alt"></i>
+              Seleccionar en Mapa
             </button>
-          </form>
-        </div>
-      </aside>
-    </div>
 
-    <div class="modal-overlay" id="contact-modal-overlay">
-      <div class="modal-content contact-modal">
-        <div class="contact-header">
-          <i class="fas fa-headset"></i>
-          <h3>Contacto y Soporte</h3>
-          <button class="close-btn" id="toggle-contact">
-            <i class="fas fa-times"></i>
+            <div class="coords-manual">
+              <input
+                type="number"
+                id="lat-input"
+                placeholder="Latitud"
+                step="any"
+                class="form-input"
+              />
+              <input
+                type="number"
+                id="lng-input"
+                placeholder="Longitud"
+                step="any"
+                class="form-input"
+              />
+              <button
+                type="button"
+                id="set-manual-coords"
+                class="btn btn-secondary"
+              >
+                <i class="fas fa-check"></i>
+                Fijar
+              </button>
+            </div>
+          </div>
+
+          <button type="button" id="anotacion-send" class="btn btn-primary">
+            <i class="fas fa-paper-plane"></i>
+            Guardar Anotación
           </button>
+        </form>
+      </div>
+    </aside>
+
+    <!-- Modal: Contacto -->
+    <div class="modal-overlay" id="contact-modal-overlay">
+      <div class="modal">
+        <div class="modal-header">
+          <h3 class="modal-title">
+            <i class="fas fa-headset"></i> Contacto y Soporte
+          </h3>
+          <button class="modal-close" id="close-contact-modal">×</button>
         </div>
+
         <div class="modal-body">
-          <p>Para soporte o información adicional, contáctenos:</p>
-          <ul class="contact-info-list">
+          <p>Para soporte o información adicional:</p>
+          <ul class="contact-list">
             <li>
               <i class="fas fa-user-circle"></i>
               <strong>Pedro Alcoba Gómez</strong>
@@ -226,15 +226,19 @@
               <a
                 href="https://github.com/pedralcg/pedralcg"
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="noopener"
               >
-                https://github.com/pedralcg/pedralcg
+                github.com/pedralcg
               </a>
             </li>
           </ul>
         </div>
       </div>
     </div>
+
+    <!-- Modales avanzados removidos en MVP -->
+
+    <!-- Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script type="module" src="main.js"></script>
   </body>
