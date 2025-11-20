@@ -198,28 +198,62 @@ function displayNearbyFeatures(features, centerLat, centerLng, radius) {
     dashArray: "5, 5",
   }).addTo(map);
 
+  // Función helper para obtener icono según el tipo de capa
+  const getLayerIcon = (layer) => {
+    const icons = {
+      arboles_monumentales: "🌳",
+      vias_pecuarias: "🐄",
+      enp: "🏞️",
+      lic_zec: "🦅",
+      zepa: "🦜",
+    };
+    return icons[layer] || "📍";
+  };
+
+  // Función helper para obtener nombre legible de la capa
+  const getLayerName = (layer) => {
+    const names = {
+      arboles_monumentales: "Árbol Monumental",
+      vias_pecuarias: "Vía Pecuaria",
+      enp: "ENP",
+      lic_zec: "LIC/ZEC",
+      zepa: "ZEPA",
+    };
+    return names[layer] || layer;
+  };
+
+  // Función helper para formatear distancia en km
+  const formatDistance = (meters) => {
+    if (meters < 1000) {
+      return `${Math.round(meters)}m`;
+    }
+    return `${(meters / 1000).toFixed(2)}km`;
+  };
+
   // Crear HTML para resultados
+  const radiusKm = (radius / 1000).toFixed(1);
   let html = `
     <div class="nearby-results">
       <h3>📍 Elementos Cercanos</h3>
-      <p class="nearby-info">Radio: ${radius}m | Total: ${features.length}</p>
+      <p class="nearby-info">Radio: ${radiusKm}km | Encontrados: ${features.length}</p>
       <div class="nearby-list">
   `;
 
   features.forEach((feature) => {
-    // La función SQL devuelve geom como JSONB con coordinates
     const coords = feature.geom?.coordinates || [0, 0];
+    const icon = getLayerIcon(feature.layer);
+    const layerName = getLayerName(feature.layer);
+    const distance = formatDistance(feature.distance_meters);
+
     html += `
-      <div class="nearby-item" data-lat="${coords[1]}" 
-           data-lng="${coords[0]}">
+      <div class="nearby-item" data-lat="${coords[1]}" data-lng="${coords[0]}">
         <div class="nearby-header">
+          <span class="nearby-icon">${icon}</span>
           <strong>${feature.feature_name}</strong>
-          <span class="nearby-distance">${Math.round(
-            feature.distance_meters
-          )}m</span>
         </div>
         <div class="nearby-meta">
-          <span class="nearby-layer">${feature.layer}</span>
+          <span class="nearby-layer">${layerName}</span>
+          <span class="nearby-distance">${distance}</span>
         </div>
       </div>
     `;
@@ -230,7 +264,7 @@ function displayNearbyFeatures(features, centerLat, centerLng, radius) {
     </div>
   `;
 
-  const popup = L.popup({ maxWidth: 400 })
+  const popup = L.popup({ maxWidth: 450 })
     .setLatLng([centerLat, centerLng])
     .setContent(html)
     .openOn(map);
@@ -596,13 +630,7 @@ export function setupAdvancedContextMenu() {
       <div class="context-menu">
         <h4>Acciones Avanzadas</h4>
         <button class="context-btn" data-action="nearby">
-          <i class="fas fa-search-location"></i> Buscar Cercanos (1km)
-        </button>
-        <button class="context-btn" data-action="protection">
-          <i class="fas fa-shield-alt"></i> Zonas de Protección
-        </button>
-        <button class="context-btn" data-action="geocode">
-          <i class="fas fa-map-marker-alt"></i> Info del Lugar
+          <i class="fas fa-search-location"></i> Buscar Cercanos (10km)
         </button>
         <hr>
         <div class="coords-info">
@@ -620,19 +648,8 @@ export function setupAdvancedContextMenu() {
           const action = btn.dataset.action;
           map.closePopup();
 
-          switch (action) {
-            case "nearby":
-              await getNearbyFeatures(lat, lng, 1000);
-              break;
-            case "protection":
-              await getProtectionZones(lat, lng);
-              break;
-            case "geocode":
-              const info = await reverseGeocode(lat, lng);
-              if (info) {
-                displayReverseGeocodeInfo(info, lat, lng);
-              }
-              break;
+          if (action === "nearby") {
+            await getNearbyFeatures(lat, lng, 10000);
           }
         });
       });
