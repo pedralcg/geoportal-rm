@@ -2,11 +2,34 @@ import { supabaseUrl, supabaseKey } from "./config.js";
 import { setStatus } from "./ui.js";
 import { map } from "./map.js";
 import { safeParseJSON, reloadAllActiveLayers } from "./data.js";
+import { setCurrentMunicipality } from "./ui-integration.js";
 
 export let municipiosIndex = [];
-export let highlightLayer = null; // CLAVE: Variable para el resaltado del municipio
+export let highlightLayer = null;
 
-// --- PRECARGA DE MUNICIPIOS ---
+// ================================================================
+// UTILIDADES DE OPTIMIZACIÓN
+// ================================================================
+
+// Debounce para optimizar búsqueda
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+// Caché simple para geometrías de municipios
+const geometryCache = new Map();
+
+// ================================================================
+// PRECARGA DE MUNICIPIOS
+// ================================================================
 
 export async function preloadMunicipios() {
   try {
@@ -24,19 +47,33 @@ export async function preloadMunicipios() {
     municipiosIndex = [
       ...new Set(data.map((item) => item.Municipio).filter(Boolean)),
     ].sort();
+
+    console.log(`📍 ${municipiosIndex.length} municipios cargados`);
   } catch (error) {
     console.error("Error cargando municipios:", error);
   }
 }
 
-// --- LÓGICA DE BÚSQUEDA ---
+// ================================================================
+// BÚSQUEDA CON DEBOUNCING
+// ================================================================
 
-export function onSearch(e) {
-  const query = e.target.value.trim().toLowerCase();
+// ================================================================
+// BÚSQUEDA CON DEBOUNCING
+// ================================================================
+
+function performSearch(query) {
   const resultsDiv = document.getElementById("search-results");
+  const clearBtn = document.getElementById("search-clear");
+
+  if (query.length > 0) {
+    clearBtn.classList.remove("hidden");
+  } else {
+    clearBtn.classList.add("hidden");
+  }
 
   if (query.length < 2) {
-    resultsDiv.classList.remove("show");
+    resultsDiv.classList.remove("active");
     resultsDiv.innerHTML = "";
     return;
   }
@@ -45,99 +82,125 @@ export function onSearch(e) {
     .filter((municipio) => municipio.toLowerCase().includes(query))
     .slice(0, 7);
 
-  // Añadir una opción explícita para limpiar el filtro en los resultados
-  const clearOption = '<div data-name="Limpiar">❌ Limpiar Filtro</div>';
+  if (matches.length === 0) {
+    resultsDiv.classList.remove("active");
+    resultsDiv.innerHTML = "";
+    return;
+  }
 
-  resultsDiv.innerHTML =
-    matches
-      .map((municipio) => `<div data-name="${municipio}">${municipio}</div>`)
-      .join("") + clearOption; // Mostrar la opción de limpiar
+  resultsDiv.innerHTML = matches
+    .map((municipio) => `<div data-name="${municipio}">${municipio}</div>`)
+    .join("");
 
-  resultsDiv.classList.add("show");
+  resultsDiv.classList.add("active");
 
   resultsDiv.querySelectorAll("div").forEach((div) => {
     div.addEventListener("click", () => selectMunicipio(div.dataset.name));
   });
 }
 
+// Exportar versión con debounce (300ms)
+export const onSearch = debounce((e) => {
+  const query = e.target.value.trim().toLowerCase();
+  performSearch(query);
+}, 300);
+
+// ================================================================
+// SELECCIÓN DE MUNICIPIO OPTIMIZADA
+// ================================================================
+
 export async function selectMunicipio(name) {
   const resultsDiv = document.getElementById("search-results");
-  resultsDiv.classList.remove("show");
+  const searchInput = document.getElementById("search-input");
+  const clearBtn = document.getElementById("search-clear");
+
+  resultsDiv.classList.remove("active");
   resultsDiv.innerHTML = "";
 
-  // 1. Limpiar el resaltado anterior
+  // Limpiar el resaltado anterior
   if (highlightLayer) {
     map.removeLayer(highlightLayer);
     highlightLayer = null;
   }
 
-  // 2. Lógica para ELIMINAR EL FILTRO (si se busca 'limpiar', 'reset' o cadena vacía)
-  const lowerName = name.trim().toLowerCase();
-  if (lowerName === "" || lowerName === "limpiar" || lowerName === "reset") {
-    document.getElementById("search-input").value = ""; // Vaciar la barra
+  // Lógica para eliminar el filtro (si name es null o vacío)
+  if (!name) {
+    searchInput.value = "";
+    clearBtn.classList.add("hidden");
+    setCurrentMunicipality(null);
     setStatus(
       "info",
       "Filtro espacial de municipio eliminado. Recargando capas..."
     );
-    await reloadAllActiveLayers(null); // CLAVE: Llama a null para recargar sin filtro
+    await reloadAllActiveLayers(null);
     return;
   }
 
-  // 3. Vaciar la barra de búsqueda después de la selección
-  document.getElementById("search-input").value = "";
+  // Actualizar input y mostrar botón limpiar
+  searchInput.value = name;
+  clearBtn.classList.remove("hidden");
 
   setStatus("warning", `Localizando y filtrando por municipio ${name}...`);
 
   try {
-    const url = `${supabaseUrl}/rest/v1/municipios_rm?select=geom,Municipio&Municipio=eq.${encodeURIComponent(
-      name
-    )}&limit=1`;
-    const response = await fetch(url, {
-      headers: {
-        apikey: supabaseKey,
-        Authorization: `Bearer ${supabaseKey}`,
-      },
-    });
+    // Verificar caché primero
+    let geom = geometryCache.get(name);
 
-    const data = await response.json();
+    if (!geom) {
+      // Si no está en caché, hacer petición
+      const url = `${supabaseUrl}/rest/v1/municipios_rm?select=geom,Municipio&Municipio=eq.${encodeURIComponent(
+        name
+      )}&limit=1`;
+      const response = await fetch(url, {
+        headers: {
+          apikey: supabaseKey,
+          Authorization: `Bearer ${supabaseKey}`,
+        },
+      });
 
-    if (data.length && data[0].geom) {
-      const geom =
-        typeof data[0].geom === "string"
-          ? safeParseJSON(data[0].geom)
-          : data[0].geom;
+      const data = await response.json();
 
-      if (geom) {
-        // CREACIÓN del Resaltado Temporal (soluciona la visibilidad)
-        highlightLayer = L.geoJSON(geom, {
-          style: {
-            color: "#f59e0b", // Naranja
-            weight: 4,
-            opacity: 1,
-            fillOpacity: 0.05,
-            dashArray: "5, 5",
-          },
-        }).addTo(map);
+      if (data.length && data[0].geom) {
+        geom =
+          typeof data[0].geom === "string"
+            ? safeParseJSON(data[0].geom)
+            : data[0].geom;
 
-        // Ajusta el zoom al nuevo resaltado
-        map.fitBounds(highlightLayer.getBounds(), { padding: [20, 20] });
-
-        // Filtra las capas de datos (Árboles, etc.)
-        await reloadAllActiveLayers(geom);
-
-        setStatus("success", `Municipio ${name} localizado y capas filtradas.`);
-      } else {
-        await reloadAllActiveLayers(null);
-        setStatus(
-          "info",
-          `Municipio localizado. No se pudo dibujar la geometría. Se ha limpiado el filtro.`
-        );
+        // Guardar en caché
+        if (geom) {
+          geometryCache.set(name, geom);
+        }
       }
+    }
+
+    if (geom) {
+      // Crear resaltado temporal
+      highlightLayer = L.geoJSON(geom, {
+        style: {
+          color: "#7a9b76", // sage-green
+          weight: 3,
+          opacity: 1,
+          fillOpacity: 0.08,
+          dashArray: "8, 4",
+        },
+      }).addTo(map);
+
+      // Ajustar zoom
+      map.fitBounds(highlightLayer.getBounds(), { padding: [30, 30] });
+
+      // Actualizar municipio actual
+      setCurrentMunicipality(name);
+
+      // Filtrar capas
+      await reloadAllActiveLayers(geom);
+
+      setStatus("success", `Municipio ${name} localizado y capas filtradas.`);
     } else {
       await reloadAllActiveLayers(null);
+      setCurrentMunicipality(null);
       setStatus(
         "info",
-        `Municipio ${name} no encontrado o sin geometría. Filtro limpiado.`
+        `Municipio localizado. No se pudo dibujar la geometría. Se ha limpiado el filtro.`
       );
     }
   } catch (error) {
@@ -147,5 +210,25 @@ export async function selectMunicipio(name) {
       "No se pudo localizar el municipio o filtrar las capas."
     );
     await reloadAllActiveLayers(null);
+    setCurrentMunicipality(null);
+  }
+}
+
+// ================================================================
+// LIMPIAR CACHÉ (útil para desarrollo)
+// ================================================================
+
+export function clearGeometryCache() {
+  geometryCache.clear();
+  console.log("🧹 Caché de geometrías limpiado");
+}
+
+// Inicializar evento del botón limpiar
+export function setupSearchEvents() {
+  const clearBtn = document.getElementById("search-clear");
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      selectMunicipio(null);
+    });
   }
 }

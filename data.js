@@ -2,18 +2,39 @@ import { supabaseUrl, supabaseKey, layersConfig } from "./config.js";
 import { map, layerGroups, showPopup } from "./map.js";
 import { setStatus } from "./ui.js";
 
-// --- LISTA DE TIPOS DE ANOTACIÓN PARA LA LEYENDA Y EL MAPA (EXPORTADO) ---
-export const ANOTACION_TYPES = [
-  { key: "riesgo_incendio", name: "Riesgo de Incendio" },
-  { key: "plaga_forestal", name: "Plaga Forestal" },
-  { key: "inventario_forestal", name: "Inventario Forestal" },
-  { key: "fauna", name: "Fauna Silvestre" },
-  { key: "punto_control_lidar", name: "Punto de Control LiDAR" },
-  { key: "validacion_datos_gis", name: "Validación Datos GIS" },
-  { key: "otro", name: "Otro Tipo" },
-];
+// ================================================================
+// TIPOS DE ANOTACIÓN Y CONFIGURACIÓN
+// ================================================================
 
-// --- UTILIDADES ---
+// ================================================================
+// CACHÉ DE CAPAS
+// ================================================================
+
+const layerDataCache = new Map();
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+
+function getCachedData(key, filterHash) {
+  const cacheKey = `${key}_${filterHash || "all"}`;
+  const cached = layerDataCache.get(cacheKey);
+
+  if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+    return cached.data;
+  }
+
+  return null;
+}
+
+function setCachedData(key, filterHash, data) {
+  const cacheKey = `${key}_${filterHash || "all"}`;
+  layerDataCache.set(cacheKey, {
+    data,
+    timestamp: Date.now(),
+  });
+}
+
+// ================================================================
+// UTILIDADES
+// ================================================================
 
 export function safeParseJSON(text) {
   try {
@@ -23,28 +44,7 @@ export function safeParseJSON(text) {
   }
 }
 
-// Función para obtener el icono según el tipo de anotación (EXPORTADO)
-export function getAnotacionIcon(tipo) {
-  // Mapeo de los valores del <select> a un icono de Font Awesome
-  switch (tipo) {
-    case "riesgo_incendio":
-      return { icon: "fas fa-fire-alt", color: "#ef4444" }; // Rojo
-    case "plaga_forestal":
-      return { icon: "fas fa-bug", color: "#84cc16" }; // Verde Lima
-    case "inventario_forestal":
-      return { icon: "fas fa-tree", color: "#10b981" }; // Verde Esmeralda
-    case "fauna":
-      return { icon: "fas fa-paw", color: "#7c3aed" }; // Púrpura
-    case "punto_control_lidar":
-      return { icon: "fas fa-location-dot", color: "#0ea5e9" }; // Azul Claro
-    case "validacion_datos_gis":
-      return { icon: "fas fa-map-marked-alt", color: "#f97316" }; // Naranja
-    case "otro":
-    default:
-      // Caso por defecto, incluyendo si 'tipo' es null/undefined
-      return { icon: "fas fa-exclamation-triangle", color: "#f59e0b" };
-  }
-}
+// Iconos optimizados con colores medioambientales
 
 export function featureStyle(key) {
   const color = layersConfig[key].color;
@@ -54,8 +54,7 @@ export function featureStyle(key) {
     return { color: color, weight: 2.5, opacity: 0.9 };
   }
 
-  // Excluir la capa 'anotaciones' del estilo de punto por defecto
-  if (type === "point" && key !== "anotaciones") {
+  if (type === "point") {
     return {
       color: color,
       weight: 2,
@@ -65,7 +64,6 @@ export function featureStyle(key) {
     };
   }
 
-  // Estilo por defecto (para polígonos y para la capa 'anotaciones' L.geoJSON)
   return {
     color: color,
     weight: 2,
@@ -75,9 +73,9 @@ export function featureStyle(key) {
   };
 }
 
-// ------------------------------------------
-// --- GESTIÓN DE FILTRO ESPACIAL GLOBAL ---
-// ------------------------------------------
+// ================================================================
+// FILTRO ESPACIAL GLOBAL
+// ================================================================
 
 export let currentSpatialFilterGeom = null;
 
@@ -94,10 +92,9 @@ function getActiveLayerKeys() {
 
 export async function reloadAllActiveLayers(geom = null) {
   currentSpatialFilterGeom = geom;
-
   const activeKeys = getActiveLayerKeys();
 
-  // 1. Remover las capas existentes del mapa para forzar la recarga
+  // Remover capas existentes
   for (const key of activeKeys) {
     if (layerGroups[key]) {
       map.removeLayer(layerGroups[key]);
@@ -105,9 +102,8 @@ export async function reloadAllActiveLayers(geom = null) {
     }
   }
 
-  // 2. Recargar las capas.
+  // Recargar capas activas
   for (const key of activeKeys) {
-    // Solo cargar capas que no sean 'municipios_rm' cuando hay un filtro (geom).
     if (key !== "municipios_rm" || !geom) {
       await loadLayer(key);
     }
@@ -118,16 +114,17 @@ export async function reloadAllActiveLayers(geom = null) {
   }
 }
 
-// ------------------------------------------
-// --- CARGA Y GESTIÓN DE CAPAS ---
-// ------------------------------------------
+// ================================================================
+// CARGA DE CAPAS OPTIMIZADA
+// ================================================================
 
 export async function loadDefaultLayers() {
-  for (const [key, cfg] of Object.entries(layersConfig)) {
-    if (cfg.active) {
-      await loadLayer(key);
-    }
-  }
+  const defaultLayers = Object.entries(layersConfig)
+    .filter(([_, cfg]) => cfg.active)
+    .map(([key]) => key);
+
+  // Cargar capas en paralelo para mejor rendimiento
+  await Promise.all(defaultLayers.map((key) => loadLayer(key)));
 }
 
 export async function toggleLayer(key, visible) {
@@ -150,21 +147,33 @@ export async function loadLayer(key) {
   setStatus("warning", `Cargando ${layersConfig[key].name}...`);
 
   try {
-    let url;
-    let options;
+    const geomToFilter =
+      key === "municipios_rm" ? null : currentSpatialFilterGeom;
+    const filterHash = geomToFilter
+      ? JSON.stringify(geomToFilter).substring(0, 50)
+      : null;
 
+    // Verificar caché primero
+    const cachedData = getCachedData(key, filterHash);
+    if (cachedData) {
+      renderLayerData(key, cachedData);
+      setStatus(
+        "success",
+        `${layersConfig[key].name}: ${cachedData.length} elementos (caché)`
+      );
+      return;
+    }
+
+    // Preparar petición
+    let url, options;
     const baseHeaders = {
       apikey: supabaseKey,
       Authorization: `Bearer ${supabaseKey}`,
     };
 
-    const geomToFilter =
-      key === "municipios_rm" ? null : currentSpatialFilterGeom;
-
     if (geomToFilter) {
-      // Usar el endpoint RPC para filtro espacial
+      // Usar RPC para filtro espacial
       url = `${supabaseUrl}/rest/v1/rpc/get_spatial_features`;
-
       options = {
         method: "POST",
         headers: {
@@ -178,85 +187,83 @@ export async function loadLayer(key) {
         }),
       };
     } else {
-      // Caso normal: GET para la carga predeterminada
+      // GET normal con límite optimizado
       url = `${supabaseUrl}/rest/v1/${key}?select=*,geom&limit=2000`;
       options = { headers: baseHeaders };
     }
 
     const response = await fetch(url, options);
-
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
     const data = await response.json();
-    const group = L.layerGroup();
 
-    data.forEach((item) => {
-      if (!item.geom) return;
+    // Guardar en caché
+    setCachedData(key, filterHash, data);
 
-      const geom =
-        typeof item.geom === "string" ? safeParseJSON(item.geom) : item.geom;
-      if (!geom) return;
-
-      const style = featureStyle(key);
-
-      const layer = L.geoJSON(geom, {
-        style: style,
-        pointToLayer: (feature, latlng) => {
-          // LÓGICA DE ICONO TEMÁTICO PARA ANOTACIONES
-          if (key === "anotaciones") {
-            // ¡CORREGIDO! Antes era "reportes"
-            // Comprobación defensiva: asegura que item existe y tiene el tipo
-            const tipo =
-              item && item.tipo_anotacion ? item.tipo_anotacion : "otro";
-            const iconData = getAnotacionIcon(tipo);
-
-            return L.marker(latlng, {
-              icon: L.divIcon({
-                className: "custom-anotacion-icon",
-                html: `<i class='${iconData.icon}' style='color: ${iconData.color}; font-size: 24px;'></i>`,
-                iconSize: [24, 24],
-                iconAnchor: [12, 24],
-                popupAnchor: [0, -24],
-              }),
-            });
-          }
-
-          // LÓGICA DE PUNTO POR DEFECTO PARA OTRAS CAPAS
-          return L.circleMarker(latlng, {
-            ...style,
-            radius: 6,
-            weight: 2,
-            fillOpacity: 0.7,
-          });
-        },
-      });
-
-      layer.eachLayer((l) => {
-        l.on("click", () => {
-          const props = Object.assign({}, item);
-          delete props.geom;
-
-          // Título específico para las anotaciones
-          const title =
-            key === "anotaciones" // ¡CORREGIDO! Antes era "reportes"
-              ? "Detalle de Anotación"
-              : layersConfig[key].name;
-
-          showPopup(l, props, title);
-        });
-      });
-
-      group.addLayer(layer);
-    });
-
-    layerGroups[key] = group;
-    group.addTo(map);
+    // Renderizar
+    renderLayerData(key, data);
     setStatus("success", `${layersConfig[key].name}: ${data.length} elementos`);
   } catch (error) {
     console.error(error);
     setStatus(
       "error",
-      `Error cargando ${layersConfig[key].name} (Error: ${error.message})`
+      `Error cargando ${layersConfig[key].name} (${error.message})`
     );
   }
+}
+
+// ================================================================
+// RENDERIZADO DE CAPAS
+// ================================================================
+
+function renderLayerData(key, data) {
+  const group = L.layerGroup();
+  const style = featureStyle(key);
+
+  data.forEach((item) => {
+    if (!item.geom) return;
+
+    const geom =
+      typeof item.geom === "string" ? safeParseJSON(item.geom) : item.geom;
+    if (!geom) return;
+
+    const layer = L.geoJSON(geom, {
+      style: style,
+      pointToLayer: (feature, latlng) => {
+        // Iconos temáticos para anotaciones
+
+        // Puntos por defecto
+        return L.circleMarker(latlng, {
+          ...style,
+          radius: 6,
+          weight: 2,
+          fillOpacity: 0.7,
+        });
+      },
+    });
+
+    // Event listeners optimizados
+    layer.eachLayer((l) => {
+      l.on("click", () => {
+        const props = { ...item };
+        delete props.geom;
+        const title = layersConfig[key].name;
+        showPopup(l, props, title);
+      });
+    });
+
+    group.addLayer(layer);
+  });
+
+  layerGroups[key] = group;
+  group.addTo(map);
+}
+
+// ================================================================
+// LIMPIEZA DE CACHÉ
+// ================================================================
+
+export function clearLayerCache() {
+  layerDataCache.clear();
+  console.log("🧹 Caché de capas limpiado");
 }

@@ -7,7 +7,6 @@ import {
 } from "./ui.js";
 import { loadDefaultLayers, safeParseJSON } from "./data.js";
 import { preloadMunicipios } from "./search.js";
-import { setAnotacionLocationFromMap, mapPickingMode } from "./anotacion.js";
 
 // --- VARIABLES GLOBALES DEL MAPA ---
 export let map;
@@ -17,7 +16,7 @@ export let municipiosHighlight = null;
 
 // --- INICIALIZACIÓN ---
 
-export function init() {
+export async function init() {
   // 1. Inicialización del mapa
   map = L.map("map", {
     center: [38.0, -1.3], // Coordenadas de Murcia, España
@@ -29,17 +28,14 @@ export function init() {
   L.control.zoom({ position: "bottomright" }).addTo(map);
   map.invalidateSize();
 
-  map.on("click", (e) => {
-    if (mapPickingMode) {
-      setAnotacionLocationFromMap(e.latlng);
-    }
-  });
-
   // 2. Construcción de UI y carga de datos
   buildBasemapUI();
   buildLayersUI();
+
+  // IMPORTANTE: Esperar a que se carguen los municipios antes de continuar
+  await preloadMunicipios();
+
   loadDefaultLayers();
-  preloadMunicipios();
   setupEventListeners();
 
   setStatus("success", "Geoportal cargado correctamente");

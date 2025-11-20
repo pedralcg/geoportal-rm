@@ -45,10 +45,11 @@ function setupMapControls() {
   // Botón Limpiar Filtros
   const btnClearFilters = document.getElementById("btn-clear-filters");
   if (btnClearFilters) {
-    btnClearFilters.addEventListener("click", () => {
-      currentMunicipality = null;
+    btnClearFilters.addEventListener("click", async () => {
+      // Importar selectMunicipio dinámicamente para evitar dependencias circulares
+      const { selectMunicipio } = await import("./search.js");
+      await selectMunicipio(null);
       setStatus("success", "Filtros espaciales eliminados");
-      document.getElementById("search-input").value = "";
     });
   }
 

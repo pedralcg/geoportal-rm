@@ -35,6 +35,13 @@
           class="search-input"
           autocomplete="off"
         />
+        <button
+          id="search-clear"
+          class="search-clear-btn hidden"
+          title="Limpiar búsqueda"
+        >
+          <i class="fas fa-times"></i>
+        </button>
         <div id="search-results" class="search-results"></div>
       </div>
     </header>
@@ -64,13 +71,9 @@
         </div>
 
         <!-- Acciones Principales -->
-        <button class="btn btn-primary" id="toggle-anotacion-sidebar">
-          <i class="fas fa-map-pin"></i>
-          Añadir Anotación
-        </button>
 
         <button class="btn btn-secondary" id="toggle-contact">
-          <i class="fas fa-headset"></i>
+          <i class="fas fa-envelope"></i>
           Contacto
         </button>
       </div>
@@ -104,101 +107,6 @@
     </main>
 
     <!-- Sidebar Derecho: Anotaciones -->
-    <aside class="sidebar right-sidebar hidden" id="right-sidebar">
-      <div class="sidebar-header">
-        <h2><i class="fas fa-paper-plane"></i> Añadir Anotación</h2>
-        <button class="btn-icon" id="close-anotacion-sidebar">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-
-      <div class="sidebar-content">
-        <form id="anotacion-form">
-          <div class="form-group">
-            <label for="nombre" class="form-label">Nombre *</label>
-            <input
-              type="text"
-              id="nombre"
-              class="form-input"
-              placeholder="Tu nombre"
-              required
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="tipo" class="form-label">Tipo de Anotación *</label>
-            <select id="tipo" class="form-select" required>
-              <option value="">Seleccione...</option>
-              <option value="riesgo_incendio">🔥 Riesgo de Incendio</option>
-              <option value="plaga_forestal">🐛 Plaga Forestal</option>
-              <option value="inventario_forestal">
-                🌲 Inventario Forestal
-              </option>
-              <option value="fauna">🐾 Fauna Silvestre</option>
-              <option value="punto_control_lidar">
-                📍 Punto Control LiDAR
-              </option>
-              <option value="validacion_datos_gis">🗺️ Validación GIS</option>
-              <option value="otro">⚠️ Otro</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="comentarios" class="form-label">Comentarios *</label>
-            <textarea
-              id="comentarios"
-              class="form-textarea"
-              placeholder="Describe la observación..."
-              required
-            ></textarea>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Ubicación *</label>
-
-            <div class="coords-display" id="coords-display-container">
-              <i class="fas fa-crosshairs"></i>
-              <span id="coords-text">No seleccionada</span>
-            </div>
-
-            <button type="button" id="pick-on-map" class="btn btn-secondary">
-              <i class="fas fa-map-marker-alt"></i>
-              Seleccionar en Mapa
-            </button>
-
-            <div class="coords-manual">
-              <input
-                type="number"
-                id="lat-input"
-                placeholder="Latitud"
-                step="any"
-                class="form-input"
-              />
-              <input
-                type="number"
-                id="lng-input"
-                placeholder="Longitud"
-                step="any"
-                class="form-input"
-              />
-              <button
-                type="button"
-                id="set-manual-coords"
-                class="btn btn-secondary"
-              >
-                <i class="fas fa-check"></i>
-                Fijar
-              </button>
-            </div>
-          </div>
-
-          <button type="button" id="anotacion-send" class="btn btn-primary">
-            <i class="fas fa-paper-plane"></i>
-            Guardar Anotación
-          </button>
-        </form>
-      </div>
-    </aside>
 
     <!-- Modal: Contacto -->
     <div class="modal-overlay" id="contact-modal-overlay">
