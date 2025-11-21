@@ -51,7 +51,7 @@ export async function getMunicipalityStats(municipalityName) {
     setStatus("warning", `Cargando estadísticas de ${municipalityName}...`);
 
     const response = await fetch(
-      `${supabaseUrl}/rest/v1/rpc/get_municipality_stats`,
+      `${supabaseUrl}/rest/v1/rpc/get_municipality_statistics`,
       {
         method: "POST",
         headers: {
@@ -89,56 +89,149 @@ export async function getMunicipalityStats(municipalityName) {
 
 function displayMunicipalityStats(stats) {
   const html = `
-    <div class="stats-panel">
-      <h3>📊 Estadísticas: ${stats.municipality}</h3>
+    <div class="stats-dashboard">
+      <div class="stats-header">
+        <h3>📊 Estadísticas: ${stats.municipality}</h3>
+        <div class="stats-area">Superficie: ${stats.area_km2} km²</div>
+      </div>
+      
       <div class="stats-grid">
-        <div class="stat-item">
-          <span class="stat-label">Anotaciones Totales</span>
-          <span class="stat-value">${stats.anotaciones?.total || 0}</span>
+        <!-- Árboles Monumentales -->
+        <div class="stat-card clickable" data-category="arboles">
+          <div class="stat-icon">🌳</div>
+          <div class="stat-content">
+            <div class="stat-value">${stats.arboles_monumentales.count}</div>
+            <div class="stat-label">Árboles Monumentales</div>
+            <div class="stat-sublabel">${stats.arboles_monumentales.densidad_por_km2} por km²</div>
+          </div>
         </div>
-        <div class="stat-item">
-          <span class="stat-label">Árboles Monumentales</span>
-          <span class="stat-value">${stats.arboles_monumentales || 0}</span>
+        
+        <!-- Vías Pecuarias -->
+        <div class="stat-card clickable" data-category="vias">
+          <div class="stat-icon">🐄</div>
+          <div class="stat-content">
+            <div class="stat-value">${stats.vias_pecuarias.count}</div>
+            <div class="stat-label">Vías Pecuarias</div>
+            <div class="stat-sublabel">${stats.vias_pecuarias.longitud_km} km totales</div>
+          </div>
         </div>
-        <div class="stat-item">
-          <span class="stat-label">Área ENP (km²)</span>
-          <span class="stat-value">${(stats.enp_area_km2 || 0).toFixed(
-            2
-          )}</span>
+        
+        <!-- ENP -->
+        <div class="stat-card clickable" data-category="enp">
+          <div class="stat-icon">🏞️</div>
+          <div class="stat-content">
+            <div class="stat-value">${stats.enp.superficie_km2} km²</div>
+            <div class="stat-label">ENP</div>
+            <div class="stat-sublabel">${stats.enp.count} espacios (${stats.enp.porcentaje_protegido}%)</div>
+          </div>
         </div>
-        <div class="stat-item">
-          <span class="stat-label">Vías Pecuarias (km)</span>
-          <span class="stat-value">${(stats.vias_pecuarias_km || 0).toFixed(
-            2
-          )}</span>
+        
+        <!-- LIC/ZEC -->
+        <div class="stat-card clickable" data-category="lic_zec">
+          <div class="stat-icon">🦅</div>
+          <div class="stat-content">
+            <div class="stat-value">${stats.lic_zec.superficie_km2} km²</div>
+            <div class="stat-label">LIC/ZEC</div>
+            <div class="stat-sublabel">${stats.lic_zec.count} zonas (${stats.lic_zec.porcentaje_protegido}%)</div>
+          </div>
+        </div>
+        
+        <!-- ZEPA -->
+        <div class="stat-card clickable" data-category="zepa">
+          <div class="stat-icon">🦜</div>
+          <div class="stat-content">
+            <div class="stat-value">${stats.zepa.superficie_km2} km²</div>
+            <div class="stat-label">ZEPA</div>
+            <div class="stat-sublabel">${stats.zepa.count} zonas (${stats.zepa.porcentaje_protegido}%)</div>
+          </div>
         </div>
       </div>
-      ${
-        stats.anotaciones?.por_tipo
-          ? `
-        <div class="stats-breakdown">
-          <h4>Anotaciones por Tipo:</h4>
-          <ul>
-            ${Object.entries(stats.anotaciones.por_tipo)
-              .map(
-                ([tipo, count]) => `<li><strong>${tipo}:</strong> ${count}</li>`
-              )
-              .join("")}
-          </ul>
-        </div>
-      `
-          : ""
-      }
     </div>
   `;
 
-  // Mostrar en popup o en panel lateral
-  const popup = L.popup({ maxWidth: 400 })
+  // Mostrar en popup
+  const popup = L.popup({ maxWidth: 600, className: "stats-popup" })
     .setLatLng(map.getCenter())
     .setContent(html)
     .openOn(map);
 
+  // Añadir event listeners después de que el popup esté renderizado
+  setTimeout(() => {
+    document.querySelectorAll(".stat-card.clickable").forEach((card) => {
+      card.addEventListener("click", () => {
+        const category = card.dataset.category;
+        showStatDetails(stats, category);
+      });
+    });
+  }, 100);
+
   setStatus("success", "Estadísticas cargadas correctamente");
+}
+
+function showStatDetails(stats, category) {
+  const categoryData = {
+    arboles: {
+      title: "🌳 Árboles Monumentales",
+      items: stats.arboles_monumentales.items,
+      formatItem: (item) => `<strong>${item.nombre}</strong>`,
+    },
+    vias: {
+      title: "🐄 Vías Pecuarias",
+      items: stats.vias_pecuarias.items,
+      formatItem: (item) =>
+        `<strong>${item.nombre}</strong> - ${item.longitud_km} km`,
+    },
+    enp: {
+      title: "🏞️ Espacios Naturales Protegidos",
+      items: stats.enp.items,
+      formatItem: (item) =>
+        `<strong>${item.nombre}</strong> - ${item.superficie_km2} km²`,
+    },
+    lic_zec: {
+      title: "🦅 LIC/ZEC",
+      items: stats.lic_zec.items,
+      formatItem: (item) =>
+        `<strong>${item.nombre}</strong> - ${item.superficie_km2} km²`,
+    },
+    zepa: {
+      title: "🦜 ZEPA",
+      items: stats.zepa.items,
+      formatItem: (item) =>
+        `<strong>${item.nombre}</strong> - ${item.superficie_km2} km²`,
+    },
+  };
+
+  const data = categoryData[category];
+  if (!data || !data.items || data.items.length === 0) {
+    setStatus("info", "No hay elementos en esta categoría");
+    return;
+  }
+
+  const html = `
+    <div class="stat-details">
+      <h3>${data.title}</h3>
+      <div class="stat-details-count">Total: ${
+        data.items.length
+      } elementos</div>
+      <div class="stat-details-list">
+        ${data.items
+          .map(
+            (item) => `
+          <div class="stat-detail-item">
+            ${data.formatItem(item)}
+          </div>
+        `
+          )
+          .join("")}
+      </div>
+    </div>
+  `;
+
+  // Mostrar en nuevo popup
+  const popup = L.popup({ maxWidth: 500, className: "stat-details-popup" })
+    .setLatLng(map.getCenter())
+    .setContent(html)
+    .openOn(map);
 }
 
 // ==============================================================

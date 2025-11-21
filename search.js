@@ -3,6 +3,7 @@ import { setStatus } from "./ui.js";
 import { map } from "./map.js";
 import { safeParseJSON, reloadAllActiveLayers } from "./data.js";
 import { setCurrentMunicipality } from "./ui-integration.js";
+import { getMunicipalityStats } from "./advanced-features.js";
 
 export let municipiosIndex = [];
 export let highlightLayer = null;
@@ -193,6 +194,9 @@ export async function selectMunicipio(name) {
 
       // Filtrar capas
       await reloadAllActiveLayers(geom);
+
+      // Cargar estadísticas del municipio
+      await getMunicipalityStats(name);
 
       setStatus("success", `Municipio ${name} localizado y capas filtradas.`);
     } else {

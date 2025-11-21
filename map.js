@@ -54,26 +54,81 @@ export function changeBasemap(id) {
   setStatus("info", `Cambiado a: ${BASES[id].name}`);
 }
 
-// --- LÓGICA DE POPUP ---
+// --- LÓGICA DE POPUP MEJORADA ---
 
 export function showPopup(layer, props, title) {
-  // CLAVE: Determinar la fuente del color, ya sea de .options.style (Path) o
-  // de .options (CircleMarker/Point)
+  // Determinar el color de la capa
   const color = layer.options.style
-    ? layer.options.style.color // Path (Polygon, Polyline)
-    : layer.options.color; // CircleMarker (Point)
+    ? layer.options.style.color
+    : layer.options.color;
 
-  let html = `<div style="min-width: 220px; font-size: 0.875rem;">`;
+  // Campos técnicos a filtrar
+  const technicalFields = [
+    "id",
+    "geom",
+    "geometry",
+    "created_at",
+    "updated_at",
+    "gid",
+    "objectid",
+  ];
+
+  // Función para formatear nombres de campos
+  const formatFieldName = (key) => {
+    return key
+      .replace(/_/g, " ")
+      .split(" ")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+  };
+
+  // Función para formatear valores
+  const formatValue = (value) => {
+    if (value === null || value === undefined) return "N/A";
+    if (typeof value === "number") {
+      return value.toLocaleString("es-ES", { maximumFractionDigits: 2 });
+    }
+    if (typeof value === "string" && value.match(/^\d{4}-\d{2}-\d{2}/)) {
+      try {
+        const date = new Date(value);
+        return date.toLocaleDateString("es-ES");
+      } catch (e) {
+        return value;
+      }
+    }
+    return value;
+  };
+
+  let html = `<div style="min-width: 240px; font-size: 0.875rem; padding: 8px;">`;
   html += `<h4 style="color: ${
-    color || "#333"
-  }; margin-bottom: 5px;">${title}</h4><hr style="border-color: #eee; margin-bottom: 5px;">`;
+    color || "#2d5016"
+  }; margin: 0 0 8px 0; padding-bottom: 6px; border-bottom: 2px solid ${
+    color || "#2d5016"
+  };">${title}</h4>`;
 
-  html += Object.entries(props)
-    .map(([k, v]) => {
-      if (k.toLowerCase() === "id" && !isNaN(Number(v))) return "";
-      return `<div><strong>${k.replace(/_/g, " ")}:</strong> ${v}</div>`;
-    })
-    .join("");
+  // Filtrar y formatear propiedades
+  const filteredProps = Object.entries(props)
+    .filter(([key]) => !technicalFields.includes(key.toLowerCase()))
+    .filter(
+      ([key, value]) => value !== null && value !== undefined && value !== ""
+    );
+
+  if (filteredProps.length === 0) {
+    html += `<p style="color: #666; font-style: italic;">No hay información adicional disponible</p>`;
+  } else {
+    html += `<div style="display: grid; gap: 6px;">`;
+    filteredProps.forEach(([key, value]) => {
+      const formattedKey = formatFieldName(key);
+      const formattedValue = formatValue(value);
+      html += `
+        <div style="display: flex; gap: 8px; padding: 4px 0; border-bottom: 1px solid #eee;">
+          <strong style="color: #555; min-width: 100px;">${formattedKey}:</strong>
+          <span style="color: #333;">${formattedValue}</span>
+        </div>
+      `;
+    });
+    html += `</div>`;
+  }
 
   html += `</div>`;
 
@@ -81,7 +136,7 @@ export function showPopup(layer, props, title) {
     const center = layer.getBounds
       ? layer.getBounds().getCenter()
       : layer.getLatLng();
-    L.popup().setLatLng(center).setContent(html).openOn(map);
+    L.popup({ maxWidth: 350 }).setLatLng(center).setContent(html).openOn(map);
   } catch (e) {
     console.error("Error al abrir popup:", e);
   }
