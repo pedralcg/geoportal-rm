@@ -12,7 +12,7 @@ Aplicación web interactiva para visualizar y analizar datos ambientales de la R
 - **Zonas de protección**: Verifica si un punto está en zonas protegidas
 - **Interfaz responsive**: Diseño adaptable a diferentes dispositivos
 
-## � Fuentes de Datos
+## 🔗 Fuentes de Datos
 
 - **Coberturas (Capas)**: [Geocatálogo oficial de la Región de Murcia](https://murcianatural.carm.es/geocatalogo)
 - **Mapas Base**:
@@ -21,7 +21,7 @@ Aplicación web interactiva para visualizar y analizar datos ambientales de la R
   - CartoDB Light
   - Esri World Street Map
 
-## �📁 Estructura del Proyecto
+## 📁 Estructura del Proyecto
 
 ```
 geoportal-rm/
