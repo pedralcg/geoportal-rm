@@ -32,9 +32,9 @@ export function setupAdvancedUI() {
 // ==============================================================
 
 function setupToolButtons() {
-  // Funcionalidades avanzadas removidas en MVP
-  // Los botones de herramientas avanzadas han sido eliminados del HTML
-  console.log("MVP: Funcionalidades avanzadas deshabilitadas");
+  // Las herramientas avanzadas se activan principalmente a través del menú contextual
+  // y la interacción con el mapa (click en elementos).
+  console.log("🔧 Herramientas avanzadas listas (contextuales)");
 }
 
 // ==============================================================
