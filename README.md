@@ -10,6 +10,12 @@ Aplicación web interactiva para visualizar y analizar datos ambientales de la R
 - **Detalles clickeables**: Click en cards de estadísticas para ver listas detalladas
 - **Búsqueda de elementos cercanos**: Encuentra elementos en un radio configurable
 
+## 🌍 Demo en línea
+
+Puedes probar el geoportal directamente en:
+
+🌐 [https://pedralcg.github.io/geoportal-rm/](https://pedralcg.github.io/geoportal-rm/)
+
 ## 🔗 Fuentes de Datos
 
 - **Coberturas (Capas)**: [Geocatálogo oficial de la Región de Murcia](https://murcianatural.carm.es/geocatalogo)
