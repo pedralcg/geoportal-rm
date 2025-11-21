@@ -12,7 +12,16 @@ Aplicación web interactiva para visualizar y analizar datos ambientales de la R
 - **Zonas de protección**: Verifica si un punto está en zonas protegidas
 - **Interfaz responsive**: Diseño adaptable a diferentes dispositivos
 
-## 📁 Estructura del Proyecto
+## � Fuentes de Datos
+
+- **Coberturas (Capas)**: [Geocatálogo oficial de la Región de Murcia](https://murcianatural.carm.es/geocatalogo)
+- **Mapas Base**:
+  - OpenStreetMap
+  - Esri World Imagery
+  - CartoDB Light
+  - Esri World Street Map
+
+## �📁 Estructura del Proyecto
 
 ```
 geoportal-rm/
@@ -95,8 +104,25 @@ Obtiene información del lugar (municipio, vía pecuaria y árbol más cercanos)
 
 ## 📝 Licencia
 
-Proyecto desarrollado para la Región de Murcia.
+Este proyecto está disponible bajo la licencia MIT.
+
+Puedes usarlo, modificarlo y distribuirlo libremente, incluso con fines comerciales, siempre que mantengas los créditos del autor original.
+
+Consulta el archivo LICENSE para más información.
 
 ## 👥 Contacto
 
-Para más información, consulta la sección de contacto en la aplicación.
+- 🌐 Web: [pedralcg.github.io](https://pedralcg.github.io)
+- 📧 Email: [pedralcg.dev@gmail.com](mailto:pedralcg.dev@gmail.com)
+- 👤 LinkedIn: [linkedin.com/in/pedro-alcoba-gomez](https://www.linkedin.com/in/pedro-alcoba-gomez)
+- 💾 Repositorios: [github.com/pedralcg](https://github.com/pedralcg?tab=repositories)
+
+## 🤝 Cómo colaborar
+
+Si te interesa colaborar en alguno de mis proyectos o quieres aportar ideas, puedes:
+
+- Abrir un issue en el repositorio correspondiente.
+- Enviar un pull request con mejoras o correcciones.
+- Contactarme directamente por [email](mailto:pedralcg.dev@gmail.com) o [LinkedIn](https://www.linkedin.com/in/pedro-alcoba-gomez) para propuestas de colaboración.
+
+Todas las contribuciones son bienvenidas, especialmente si te interesa SIG, teledetección o desarrollo web GIS.

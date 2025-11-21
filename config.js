@@ -10,36 +10,42 @@ export const layersConfig = {
     color: "#00d31c73",
     type: "point",
     active: false,
+    attribution: "Geocatálogo oficial de la Región de Murcia",
   },
   vias_pecuarias: {
     name: "Vías Pecuarias",
     color: "#ffbb00bd",
     type: "line",
     active: false,
+    attribution: "Geocatálogo oficial de la Región de Murcia",
   },
   enp: {
     name: "ENP (Espacios Naturales Protegidos)",
     color: "#90e47cff",
     type: "polygon",
     active: false,
+    attribution: "Geocatálogo oficial de la Región de Murcia",
   },
   lic_zec: {
     name: "LIC/ZEC (Lugares de Interés Comunitario / Zonas de Especial Conservación)",
     color: "#8b5cf6",
     type: "polygon",
     active: false,
+    attribution: "Geocatálogo oficial de la Región de Murcia",
   },
   zepa: {
     name: "ZEPA (Zonas de Especial Protección para las Aves)",
     color: "#789ce0ff",
     type: "polygon",
     active: false,
+    attribution: "Geocatálogo oficial de la Región de Murcia",
   },
   municipios_rm: {
     name: "Municipios RM",
     color: "#000000ff",
     type: "polygon",
     active: true,
+    attribution: "Geocatálogo oficial de la Región de Murcia",
   },
 };
 

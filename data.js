@@ -229,6 +229,7 @@ function renderLayerData(key, data) {
 
     const layer = L.geoJSON(geom, {
       style: style,
+      attribution: layersConfig[key].attribution,
       pointToLayer: (feature, latlng) => {
         // Iconos temáticos para anotaciones
 
