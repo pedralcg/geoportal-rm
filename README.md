@@ -1,14 +1,3 @@
-# Geoportal Ambiental - Región de Murcia
-
-Aplicación web interactiva para visualizar y analizar datos ambientales de la Región de Murcia.
-
-## 🌟 Características
-
-- **Visualización de capas geográficas**: Árboles monumentales, vías pecuarias, espacios naturales protegidos (ENP, LIC/ZEC, ZEPA)
-- **Búsqueda de municipios**: Filtrado espacial por municipio con caché optimizado
-- **Dashboard de estadísticas**: Estadísticas precisas calculadas con PostGIS para cada municipio
-- **Detalles clickeables**: Click en cards de estadísticas para ver listas detalladas
-- **Búsqueda de elementos cercanos**: Encuentra elementos en un radio configurable
 - **Zonas de protección**: Verifica si un punto está en zonas protegidas
 - **Interfaz responsive**: Diseño adaptable a diferentes dispositivos
 
