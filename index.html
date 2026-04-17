@@ -5,9 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Geoportal Ambiental de la Región de Murcia - Visualización y gestión de datos ambientales"
+      content="Visualización interactiva de datos ambientales y territoriales de la Región de Murcia. Capas GIS, estadísticas municipales y zonas protegidas."
     />
-    <title>Geoportal Ambiental RM</title>
+    <meta name="author" content="Pedro Alcoba Gómez" />
+    <title>Geoportal Ambiental — Región de Murcia | pedralcg.dev</title>
+
+    <!-- Tipografía -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
 
     <!-- Estilos externos -->
     <link
@@ -27,30 +36,32 @@
       <h1>Geoportal Ambiental RM</h1>
 
       <div class="search-container">
-        <i class="fas fa-search search-icon"></i>
+        <i class="fas fa-search search-icon" aria-hidden="true"></i>
         <input
           type="text"
           id="search-input"
           placeholder="Buscar municipio..."
           class="search-input"
           autocomplete="off"
+          aria-label="Buscar municipio"
         />
         <button
           id="search-clear"
           class="search-clear-btn hidden"
           title="Limpiar búsqueda"
+          aria-label="Limpiar búsqueda"
         >
-          <i class="fas fa-times"></i>
+          <i class="fas fa-times" aria-hidden="true"></i>
         </button>
-        <div id="search-results" class="search-results"></div>
+        <div id="search-results" class="search-results" role="listbox"></div>
       </div>
     </header>
 
     <!-- Sidebar Izquierdo -->
-    <aside class="sidebar" id="left-sidebar">
+    <aside class="sidebar" id="left-sidebar" aria-label="Panel de capas y herramientas">
       <!-- Capas -->
       <div class="sidebar-header">
-        <h2><i class="fas fa-layer-group"></i> Capas</h2>
+        <h2><i class="fas fa-layer-group" aria-hidden="true"></i> Capas</h2>
       </div>
 
       <div class="sidebar-content">
@@ -61,7 +72,7 @@
         <!-- Mapas Base -->
         <div class="layers-section">
           <h3 class="section-title">Mapa Base</h3>
-          <select id="basemap-select" class="form-select"></select>
+          <select id="basemap-select" class="form-select" aria-label="Seleccionar mapa base"></select>
         </div>
 
         <!-- Herramientas -->
@@ -79,69 +90,78 @@
           </ul>
         </div>
 
-        <!-- Acciones Principales -->
-
         <button class="btn btn-secondary" id="toggle-contact">
-          <i class="fas fa-envelope"></i>
+          <i class="fas fa-envelope" aria-hidden="true"></i>
           Contacto
         </button>
+      </div>
+
+      <!-- Créditos en la parte inferior del sidebar -->
+      <div class="sidebar-footer">
+        <span>© <span id="year"></span> Pedro Alcoba Gómez</span>
+        <a href="https://pedralcg.dev" target="_blank" rel="noopener">pedralcg.dev</a>
       </div>
     </aside>
 
     <!-- Mapa Principal -->
-    <main class="map-container">
-      <div id="map"></div>
+    <main class="map-container" role="main">
+      <div id="map" role="region" aria-label="Mapa interactivo de la Región de Murcia"></div>
 
       <!-- Controles del Mapa -->
       <div class="map-controls">
         <button
           class="control-btn"
           id="btn-clear-filters"
-          title="Limpiar filtros"
+          title="Limpiar filtros espaciales"
+          aria-label="Limpiar filtros espaciales"
         >
-          <i class="fas fa-eraser"></i>
+          <i class="fas fa-eraser" aria-hidden="true"></i>
         </button>
 
-        <button class="control-btn" id="btn-my-location" title="Mi ubicación">
-          <i class="fas fa-location-arrow"></i>
+        <button class="control-btn" id="btn-my-location" title="Mi ubicación" aria-label="Centrar en mi ubicación">
+          <i class="fas fa-location-arrow" aria-hidden="true"></i>
         </button>
 
-        <button class="control-btn" id="btn-fit-bounds" title="Vista completa">
-          <i class="fas fa-compress-arrows-alt"></i>
+        <button class="control-btn" id="btn-fit-bounds" title="Vista completa de la Región de Murcia" aria-label="Vista completa">
+          <i class="fas fa-compress-arrows-alt" aria-hidden="true"></i>
         </button>
       </div>
 
       <!-- Panel de Estado -->
-      <div id="status" class="notification"></div>
+      <div id="status" class="notification" role="status" aria-live="polite"></div>
     </main>
 
-    <!-- Sidebar Derecho: Anotaciones -->
-
     <!-- Modal: Contacto -->
-    <div class="modal-overlay" id="contact-modal-overlay">
+    <div
+      class="modal-overlay"
+      id="contact-modal-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="contact-modal-title"
+    >
       <div class="modal">
         <div class="modal-header">
-          <h3 class="modal-title">
-            <i class="fas fa-headset"></i> Contacto y Soporte
+          <h3 class="modal-title" id="contact-modal-title">
+            <i class="fas fa-headset" aria-hidden="true"></i> Contacto y Soporte
           </h3>
-          <button class="modal-close" id="close-contact-modal">×</button>
+          <button class="modal-close" id="close-contact-modal" aria-label="Cerrar modal">×</button>
         </div>
 
         <div class="modal-body">
           <p>Para soporte o información adicional:</p>
           <ul class="contact-list">
-            <li>
-              <i class="fas fa-user-circle"></i>
+            <li class="contact-item">
+              <i class="fas fa-user-circle" aria-hidden="true"></i>
               <strong>Pedro Alcoba Gómez</strong>
             </li>
-            <li>
-              <i class="fas fa-envelope"></i>
-              <a href="mailto:pedralcg.dev@gmail.com">pedralcg.dev@gmail.com</a>
+            <li class="contact-item">
+              <i class="fas fa-envelope" aria-hidden="true"></i>
+              <a href="mailto:pedro@pedralcg.dev">pedro@pedralcg.dev</a>
             </li>
-            <li>
-              <i class="fab fa-github"></i>
+            <li class="contact-item">
+              <i class="fab fa-github" aria-hidden="true"></i>
               <a
-                href="https://github.com/pedralcg/pedralcg"
+                href="https://github.com/pedralcg"
                 target="_blank"
                 rel="noopener"
               >
@@ -153,10 +173,11 @@
       </div>
     </div>
 
-    <!-- Modales avanzados removidos en MVP -->
-
     <!-- Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script type="module" src="main.js"></script>
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
   </body>
 </html>

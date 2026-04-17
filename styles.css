@@ -1,5 +1,5 @@
 /* ================================================================
-   GEOPORTAL AMBIENTAL RM - ESTILOS OPTIMIZADOS
+   GEOPORTAL AMBIENTAL RM - ESTILOS
    Tema: Minimalista Medioambiental
    ================================================================ */
 
@@ -24,7 +24,7 @@
   --error-terracotta: #cd5c5c;
   --success-green: #4caf50;
 
-  /* Sombras Suaves */
+  /* Sombras */
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.12);
@@ -37,7 +37,7 @@
   --space-xl: 2rem;
 
   /* Tipografía */
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
   --font-mono: "Courier New", monospace;
 
@@ -68,6 +68,11 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow: hidden;
+}
+
+:focus-visible {
+  outline: 2px solid var(--earth-brown);
+  outline-offset: 2px;
 }
 
 /* ================================================================
@@ -105,7 +110,6 @@ header {
   padding: 0 var(--space-lg);
   box-shadow: var(--shadow-md);
   z-index: 1000;
-  backdrop-filter: blur(10px);
 }
 
 header h1 {
@@ -178,6 +182,8 @@ header h1::before {
   overflow-y: auto;
   z-index: 800;
   transition: transform var(--transition-slow);
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar.collapsed {
@@ -211,6 +217,28 @@ header h1::before {
 
 .sidebar-content {
   padding: var(--space-lg);
+  flex: 1;
+}
+
+.sidebar-footer {
+  padding: var(--space-md) var(--space-lg);
+  border-top: 1px solid var(--mist-white);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--stone-gray);
+}
+
+.sidebar-footer a {
+  color: var(--sage-green);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.sidebar-footer a:hover {
+  color: var(--forest-green);
+  text-decoration: underline;
 }
 
 /* ================================================================
@@ -320,33 +348,6 @@ header h1::before {
   color: var(--forest-green);
 }
 
-.search-result-item {
-  padding: var(--space-md);
-  cursor: pointer;
-  border-bottom: 1px solid var(--mist-white);
-  transition: background var(--transition-fast);
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-}
-
-.search-result-item:last-child {
-  border-bottom: none;
-}
-
-.search-result-item:hover {
-  background: var(--mist-white);
-}
-
-.search-result-item i {
-  color: var(--sage-green);
-  font-size: 1rem;
-  width: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 /* ================================================================
    CAPAS
    ================================================================ */
@@ -416,7 +417,7 @@ header h1::before {
   gap: var(--space-sm);
 }
 
-/* Switch Toggle Personalizado */
+/* Switch Toggle */
 .layer-switch {
   position: relative;
   display: inline-block;
@@ -751,29 +752,66 @@ input:checked + .layer-slider:before {
   min-width: 80px;
 }
 
+/* Popup de features (showPopup en map.js) */
+
+.feature-popup {
+  min-width: 240px;
+  font-size: 0.875rem;
+  padding: 8px;
+}
+
+.feature-popup-title {
+  margin: 0 0 8px 0;
+  padding-bottom: 6px;
+  border-bottom: 2px solid;
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.feature-popup-empty {
+  color: var(--stone-gray);
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
+.feature-popup-grid {
+  display: grid;
+  gap: 4px;
+}
+
+.feature-popup-row {
+  display: flex;
+  gap: 8px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--mist-white);
+}
+
+.feature-popup-row:last-child {
+  border-bottom: none;
+}
+
+.feature-popup-key {
+  color: var(--stone-gray);
+  min-width: 100px;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  flex-shrink: 0;
+}
+
+.feature-popup-value {
+  color: var(--bark-dark);
+  font-size: 0.8125rem;
+  word-break: break-word;
+}
+
 /* ================================================================
-   CONTACTO DROPDOWN
+   CONTACTO
    ================================================================ */
 
-.contact-dropdown {
-  position: relative;
-}
-
-.contact-panel {
-  position: absolute;
-  bottom: calc(100% + 0.5rem);
-  left: 0;
-  background: var(--cloud-white);
-  border-radius: 8px;
-  box-shadow: var(--shadow-lg);
-  min-width: 280px;
-  padding: var(--space-sm);
-  display: none;
-  z-index: 1000;
-}
-
-.contact-panel.active {
-  display: block;
+.contact-list {
+  list-style: none;
+  padding: 0;
+  margin-top: var(--space-md);
 }
 
 .contact-item {
@@ -811,50 +849,6 @@ input:checked + .layer-slider:before {
 }
 
 /* ================================================================
-   COORDENADAS MANUALES
-   ================================================================ */
-
-.coords-manual {
-  margin-top: var(--space-md);
-  display: flex;
-  gap: var(--space-sm);
-}
-
-.coords-manual .form-input {
-  flex: 1;
-}
-
-.coords-display {
-  padding: var(--space-md);
-  background: var(--mist-white);
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  gap: var(--space-sm);
-  margin-bottom: var(--space-md);
-  font-size: 0.875rem;
-  color: var(--bark-dark);
-}
-
-.coords-display i {
-  color: var(--sage-green);
-}
-
-/* ================================================================
-   SIDEBAR DERECHO
-   ================================================================ */
-
-.right-sidebar {
-  right: 0;
-  left: auto;
-  transform: translateX(100%);
-}
-
-.right-sidebar:not(.hidden) {
-  transform: translateX(0);
-}
-
-/* ================================================================
    UTILIDADES
    ================================================================ */
 
@@ -871,25 +865,25 @@ input:checked + .layer-slider:before {
   text-align: center;
 }
 
-.mt-1 {
-  margin-top: var(--space-sm);
-}
-.mt-2 {
-  margin-top: var(--space-md);
-}
-.mt-3 {
-  margin-top: var(--space-lg);
+.text-sm {
+  font-size: 0.875rem;
 }
 
-.mb-1 {
+.text-muted {
+  color: var(--stone-gray);
+  line-height: 1.6;
+}
+
+.text-muted li {
   margin-bottom: var(--space-sm);
 }
-.mb-2 {
-  margin-bottom: var(--space-md);
-}
-.mb-3 {
-  margin-bottom: var(--space-lg);
-}
+
+.mt-1 { margin-top: var(--space-sm); }
+.mt-2 { margin-top: var(--space-md); }
+.mt-3 { margin-top: var(--space-lg); }
+.mb-1 { margin-bottom: var(--space-sm); }
+.mb-2 { margin-bottom: var(--space-md); }
+.mb-3 { margin-bottom: var(--space-lg); }
 
 /* ================================================================
    RESPONSIVE
@@ -922,357 +916,7 @@ input:checked + .layer-slider:before {
     width: 95%;
     max-height: 90vh;
   }
-}
 
-/* ================================================================
-   ANIMACIONES
-   ================================================================ */
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.fade-in {
-  animation: fadeIn var(--transition-slow) ease;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-.pulse {
-  animation: pulse 2s ease-in-out infinite;
-}
-
-/* ================================================================
-   SCROLLBAR PERSONALIZADO
-   ================================================================ */
-
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--mist-white);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--stone-gray);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--sage-green);
-}
-
-/* ================================================================
-   DASHBOARD DE ESTADÍSTICAS
-   ================================================================ */
-
-.stats-dashboard {
-  padding: 16px;
-  font-family: var(--font-sans);
-}
-
-.stats-header {
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 2px solid var(--stone-gray);
-}
-
-.stats-header h3 {
-  margin: 0 0 8px 0;
-  color: var(--forest-green);
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.stats-area {
-  font-size: 13px;
-  color: var(--stone-gray);
-  font-weight: 500;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 12px;
-}
-
-.stat-card {
-  background: var(--mist-white);
-  border: 1px solid var(--stone-gray);
-  border-radius: 8px;
-  padding: 14px;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  transition: all var(--transition-base);
-}
-
-.stat-card:hover {
-  border-color: var(--sage-green);
-  box-shadow: var(--shadow-sm);
-  transform: translateY(-2px);
-}
-
-.stat-icon {
-  font-size: 28px;
-  line-height: 1;
-  flex-shrink: 0;
-}
-
-.stat-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.stat-value {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--forest-green);
-  line-height: 1.2;
-  margin-bottom: 4px;
-}
-
-.stat-label {
-  font-size: 11px;
-  color: var(--stone-gray);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 600;
-  margin-bottom: 2px;
-}
-
-.stat-sublabel {
-  font-size: 12px;
-  color: var(--bark-dark);
-  margin-top: 4px;
-  line-height: 1.3;
-}
-
-/* Popup específico para estadísticas */
-.stats-popup .leaflet-popup-content-wrapper {
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.stats-popup .leaflet-popup-content {
-  margin: 0;
-  min-width: 500px;
-}
-
-.mb-1 {
-  margin-bottom: var(--space-sm);
-}
-.mb-2 {
-  margin-bottom: var(--space-md);
-}
-.mb-3 {
-  margin-bottom: var(--space-lg);
-}
-
-/* ================================================================
-   RESPONSIVE
-   ================================================================ */
-
-@media (max-width: 768px) {
-  header {
-    padding: 0 var(--space-md);
-  }
-
-  header h1 {
-    font-size: 1rem;
-  }
-
-  .sidebar {
-    width: 100%;
-  }
-
-  .map-controls {
-    right: var(--space-md);
-    top: 70px;
-  }
-
-  .control-btn {
-    width: 40px;
-    height: 40px;
-  }
-
-  .modal {
-    width: 95%;
-    max-height: 90vh;
-  }
-}
-
-/* ================================================================
-   ANIMACIONES
-   ================================================================ */
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.fade-in {
-  animation: fadeIn var(--transition-slow) ease;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-.pulse {
-  animation: pulse 2s ease-in-out infinite;
-}
-
-/* ================================================================
-   SCROLLBAR PERSONALIZADO
-   ================================================================ */
-
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--mist-white);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--stone-gray);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--sage-green);
-}
-
-/* ================================================================
-   DASHBOARD DE ESTADÍSTICAS
-   ================================================================ */
-
-.stats-dashboard {
-  padding: 16px;
-  font-family: var(--font-sans);
-}
-
-.stats-header {
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 2px solid var(--stone-gray);
-}
-
-.stats-header h3 {
-  margin: 0 0 8px 0;
-  color: var(--forest-green);
-  font-size: 18px;
-  font-weight: 600;
-}
-
-.stats-area {
-  font-size: 13px;
-  color: var(--stone-gray);
-  font-weight: 500;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 12px;
-}
-
-.stat-card {
-  background: var(--mist-white);
-  border: 1px solid var(--stone-gray);
-  border-radius: 8px;
-  padding: 14px;
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  transition: all var(--transition-base);
-}
-
-.stat-card:hover {
-  border-color: var(--sage-green);
-  box-shadow: var(--shadow-sm);
-  transform: translateY(-2px);
-}
-
-.stat-icon {
-  font-size: 28px;
-  line-height: 1;
-  flex-shrink: 0;
-}
-
-.stat-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.stat-value {
-  font-size: 22px;
-  font-weight: 700;
-  color: var(--forest-green);
-  line-height: 1.2;
-  margin-bottom: 4px;
-}
-
-.stat-label {
-  font-size: 11px;
-  color: var(--stone-gray);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: 600;
-  margin-bottom: 2px;
-}
-
-.stat-sublabel {
-  font-size: 12px;
-  color: var(--bark-dark);
-  margin-top: 4px;
-  line-height: 1.3;
-}
-
-/* Popup específico para estadísticas */
-.stats-popup .leaflet-popup-content-wrapper {
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.stats-popup .leaflet-popup-content {
-  margin: 0;
-  min-width: 500px;
-}
-
-/* Responsive para pantallas pequeñas */
-@media (max-width: 768px) {
   .stats-grid {
     grid-template-columns: 1fr;
   }
@@ -1282,7 +926,101 @@ input:checked + .layer-slider:before {
   }
 }
 
-/* Cards clickeables */
+/* ================================================================
+   ANIMACIONES
+   ================================================================ */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn var(--transition-slow) ease;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* ================================================================
+   SCROLLBAR
+   ================================================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--mist-white);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--stone-gray);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--sage-green);
+}
+
+/* ================================================================
+   DASHBOARD DE ESTADÍSTICAS (popup municipio)
+   ================================================================ */
+
+.stats-dashboard {
+  padding: 16px;
+  font-family: var(--font-sans);
+}
+
+.stats-header {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--stone-gray);
+}
+
+.stats-header h3 {
+  margin: 0 0 8px 0;
+  color: var(--forest-green);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.stats-area {
+  font-size: 13px;
+  color: var(--stone-gray);
+  font-weight: 500;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.stat-card {
+  background: var(--mist-white);
+  border: 1px solid var(--stone-gray);
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  transition: all var(--transition-base);
+}
+
+.stat-card:hover {
+  border-color: var(--sage-green);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-2px);
+}
+
 .stat-card.clickable {
   cursor: pointer;
   position: relative;
@@ -1300,6 +1038,52 @@ input:checked + .layer-slider:before {
 
 .stat-card.clickable:hover::after {
   opacity: 0.6;
+}
+
+.stat-icon {
+  font-size: 28px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.stat-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.stat-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--forest-green);
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--stone-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.stat-sublabel {
+  font-size: 12px;
+  color: var(--bark-dark);
+  margin-top: 4px;
+  line-height: 1.3;
+}
+
+/* Popup de estadísticas */
+.stats-popup .leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.stats-popup .leaflet-popup-content {
+  margin: 0;
+  min-width: 500px;
 }
 
 /* Vista de detalles */
@@ -1357,4 +1141,175 @@ input:checked + .layer-slider:before {
 .stat-details-popup .leaflet-popup-content {
   margin: 0;
   min-width: 400px;
+}
+
+/* ================================================================
+   FEATURES AVANZADAS (proximity, actividad, zonas, menú contextual)
+   ================================================================ */
+
+.nearby-results,
+.protection-zones,
+.recent-activity,
+.geocode-info {
+  font-family: var(--font-sans);
+  color: var(--bark-dark);
+}
+
+.nearby-results h3,
+.protection-zones h3,
+.recent-activity h3,
+.geocode-info h3 {
+  margin-bottom: 12px;
+  color: var(--forest-green);
+  font-size: 16px;
+  border-bottom: 2px solid var(--stone-gray);
+  padding-bottom: 8px;
+}
+
+.nearby-info {
+  font-size: 12px;
+  color: var(--stone-gray);
+  margin-bottom: 12px;
+}
+
+.nearby-list,
+.activity-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.nearby-item,
+.activity-item {
+  padding: 10px;
+  margin: 8px 0;
+  background: var(--mist-white);
+  border: 1px solid rgba(107, 114, 128, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.nearby-item:hover,
+.activity-item:hover {
+  border-color: var(--sage-green);
+  box-shadow: var(--shadow-sm);
+}
+
+.nearby-header,
+.activity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.nearby-distance,
+.activity-date {
+  font-size: 11px;
+  color: var(--stone-gray);
+  font-weight: 600;
+}
+
+.nearby-meta,
+.activity-meta {
+  font-size: 11px;
+  color: var(--stone-gray);
+}
+
+.nearby-layer,
+.activity-type {
+  background: rgba(122, 155, 118, 0.15);
+  color: var(--sage-green);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.activity-comment {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--stone-gray);
+  line-height: 1.4;
+}
+
+.zone-section {
+  margin: 12px 0;
+  padding: 12px;
+  background: var(--mist-white);
+  border-radius: 8px;
+}
+
+.zone-section h4 {
+  font-size: 13px;
+  color: var(--forest-green);
+  margin-bottom: 8px;
+}
+
+.zone-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.zone-section li {
+  padding: 4px 0;
+  font-size: 13px;
+  color: var(--bark-dark);
+}
+
+.no-zones {
+  text-align: center;
+  padding: 20px;
+  color: var(--stone-gray);
+  font-style: italic;
+}
+
+/* Menú contextual */
+.context-menu {
+  padding: 8px;
+}
+
+.context-menu h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  color: var(--bark-dark);
+}
+
+.context-btn {
+  width: 100%;
+  padding: 10px;
+  margin: 4px 0;
+  border: none;
+  background: var(--mist-white);
+  color: var(--bark-dark);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all var(--transition-fast);
+}
+
+.context-btn:hover {
+  background: var(--sage-green);
+  color: var(--cloud-white);
+}
+
+.context-btn i {
+  font-size: 14px;
+}
+
+.coords-info {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(107, 114, 128, 0.2);
+  text-align: center;
+}
+
+.coords-info small {
+  color: var(--stone-gray);
+  font-size: 11px;
 }

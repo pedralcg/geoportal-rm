@@ -3,7 +3,7 @@ import { setStatus } from "./ui.js";
 import { map } from "./map.js";
 import { safeParseJSON, reloadAllActiveLayers } from "./data.js";
 import { setCurrentMunicipality } from "./ui-integration.js";
-import { getMunicipalityStats } from "./advanced-features.js";
+import { getMunicipalityStats } from "./features/stats.js";
 
 export let municipiosIndex = [];
 export let highlightLayer = null;
@@ -54,10 +54,6 @@ export async function preloadMunicipios() {
     console.error("Error cargando municipios:", error);
   }
 }
-
-// ================================================================
-// BÚSQUEDA CON DEBOUNCING
-// ================================================================
 
 // ================================================================
 // BÚSQUEDA CON DEBOUNCING

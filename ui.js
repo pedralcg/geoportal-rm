@@ -60,18 +60,16 @@ export function buildLayersUI() {
     const item = document.createElement("div");
     item.className = "layer-item";
 
+    const tooltip = cfg.fullName ? ` title="${cfg.fullName}"` : "";
+
     item.innerHTML = `
         <div class="layer-left">
-            <span class="layer-badge" style="color: ${
-              cfg.color
-            };">${iconHtml}</span>
-            <span class="layer-label">${layerName}</span>
+            <span class="layer-badge" style="color: ${cfg.color};">${iconHtml}</span>
+            <span class="layer-label"${tooltip}>${layerName}</span>
         </div>
         <div class="layer-right">
             <label class="layer-switch">
-                <input type="checkbox" id="toggle-${key}" ${
-      cfg.active ? "checked" : ""
-    }>
+                <input type="checkbox" id="toggle-${key}" ${cfg.active ? "checked" : ""}>
                 <span class="layer-slider"></span>
             </label>
         </div>
@@ -89,7 +87,7 @@ export function buildLayersUI() {
 
 export function setStatus(type, message) {
   const statusPanel = document.getElementById("status");
-  statusPanel.className = `status-panel show ${type}`;
+  statusPanel.className = `notification show ${type}`;
 
   const icons = {
     success: "fas fa-check-circle",
@@ -98,7 +96,13 @@ export function setStatus(type, message) {
     info: "fas fa-info-circle",
   };
 
-  statusPanel.innerHTML = `<i class="${icons[type]}"></i> ${message}`;
+  const icon = document.createElement("i");
+  icon.className = icons[type] || "fas fa-info-circle";
+
+  const text = document.createElement("span");
+  text.textContent = message;
+
+  statusPanel.replaceChildren(icon, text);
 
   setTimeout(() => {
     statusPanel.classList.remove("show");

@@ -1,40 +1,28 @@
 import { map } from "./map.js";
 import { setStatus } from "./ui.js";
-import {
-  setupAdvancedContextMenu,
-  injectAdvancedStyles,
-} from "./advanced-features.js";
+import { setupAdvancedContextMenu } from "./features/context-menu.js";
 
 // Variable global para almacenar el municipio actual
 let currentMunicipality = null;
 
 // ==============================================================
-// INICIALIZACIÓN DE FUNCIONES AVANZADAS (MVP - SIMPLIFICADO)
+// INICIALIZACIÓN DE FUNCIONES AVANZADAS
 // ==============================================================
 
 export function setupAdvancedUI() {
-  // Inyectar estilos personalizados
-  injectAdvancedStyles();
-
-  // Configurar menú contextual
   setupAdvancedContextMenu();
-
-  // Configurar event listeners
   setupToolButtons();
   setupModalButtons();
   setupMapControls();
-
-  console.log("✅ UI MVP inicializada correctamente");
 }
 
 // ==============================================================
-// BOTONES DE HERRAMIENTAS (MVP - SIMPLIFICADO)
+// BOTONES DE HERRAMIENTAS
 // ==============================================================
 
 function setupToolButtons() {
-  // Las herramientas avanzadas se activan principalmente a través del menú contextual
-  // y la interacción con el mapa (click en elementos).
-  console.log("🔧 Herramientas avanzadas listas (contextuales)");
+  // Las herramientas avanzadas se activan a través del menú contextual
+  // y la interacción con el mapa (clic derecho en elementos).
 }
 
 // ==============================================================
@@ -42,18 +30,15 @@ function setupToolButtons() {
 // ==============================================================
 
 function setupMapControls() {
-  // Botón Limpiar Filtros
   const btnClearFilters = document.getElementById("btn-clear-filters");
   if (btnClearFilters) {
     btnClearFilters.addEventListener("click", async () => {
-      // Importar selectMunicipio dinámicamente para evitar dependencias circulares
       const { selectMunicipio } = await import("./search.js");
       await selectMunicipio(null);
       setStatus("success", "Filtros espaciales eliminados");
     });
   }
 
-  // Botón Mi Ubicación
   const btnMyLocation = document.getElementById("btn-my-location");
   if (btnMyLocation) {
     btnMyLocation.addEventListener("click", () => {
@@ -69,7 +54,6 @@ function setupMapControls() {
           const { latitude, longitude } = position.coords;
           map.setView([latitude, longitude], 15);
 
-          // Agregar marcador temporal
           const marker = L.marker([latitude, longitude], {
             icon: L.divIcon({
               className: "my-location-marker",
@@ -80,11 +64,7 @@ function setupMapControls() {
           }).addTo(map);
 
           setStatus("success", "Ubicación obtenida correctamente");
-
-          // Remover marcador después de 5 segundos
-          setTimeout(() => {
-            map.removeLayer(marker);
-          }, 5000);
+          setTimeout(() => map.removeLayer(marker), 5000);
         },
         (error) => {
           console.error("Error de geolocalización:", error);
@@ -94,117 +74,85 @@ function setupMapControls() {
     });
   }
 
-  // Botón Ajustar Vista
   const btnFitBounds = document.getElementById("btn-fit-bounds");
   if (btnFitBounds) {
     btnFitBounds.addEventListener("click", () => {
-      // Coordenadas aproximadas de la Región de Murcia
-      const murciaCenter = [38.0, -1.3];
-      map.setView(murciaCenter, 9);
+      map.setView([38.0, -1.3], 9);
       setStatus("info", "Vista ajustada a la Región de Murcia");
     });
   }
 }
 
 // ==============================================================
-// GESTIÓN DE MODALES (MVP - SOLO CONTACTO)
+// GESTIÓN DE MODALES
 // ==============================================================
 
 function setupModalButtons() {
-  // Modal de Contacto
   const toggleContactBtns = document.querySelectorAll("#toggle-contact");
   const closeContactBtn = document.getElementById("close-contact-modal");
 
   toggleContactBtns.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      toggleModal("contact-modal-overlay");
-    });
+    btn.addEventListener("click", () => toggleModal("contact-modal-overlay"));
   });
 
   if (closeContactBtn) {
-    closeContactBtn.addEventListener("click", () => {
-      closeModal("contact-modal-overlay");
-    });
+    closeContactBtn.addEventListener("click", () =>
+      closeModal("contact-modal-overlay")
+    );
   }
 
-  // Modales avanzados removidos en MVP (búsqueda avanzada, exportación)
-
-  // Cerrar modales al hacer click en el overlay
   document.querySelectorAll(".modal-overlay").forEach((overlay) => {
     overlay.addEventListener("click", (e) => {
-      if (e.target === overlay) {
-        closeModal(overlay.id);
-      }
+      if (e.target === overlay) closeModal(overlay.id);
     });
   });
 }
 
 function openModal(modalId) {
-  const modal = document.getElementById(modalId);
-  if (modal) {
-    modal.classList.add("active");
-  }
+  document.getElementById(modalId)?.classList.add("active");
 }
 
 function closeModal(modalId) {
-  const modal = document.getElementById(modalId);
-  if (modal) {
-    modal.classList.remove("active");
-  }
+  document.getElementById(modalId)?.classList.remove("active");
 }
 
 function toggleModal(modalId) {
-  const modal = document.getElementById(modalId);
-  if (modal) {
-    modal.classList.toggle("active");
-  }
+  document.getElementById(modalId)?.classList.toggle("active");
 }
 
 // ==============================================================
-// FUNCIÓN PARA ACTUALIZAR MUNICIPIO ACTUAL
+// MUNICIPIO ACTUAL
 // ==============================================================
 
 export function setCurrentMunicipality(municipalityName) {
   currentMunicipality = municipalityName;
-  console.log("Municipio actual:", currentMunicipality);
 }
 
 // ==============================================================
-// HELPER: CREAR TOAST NOTIFICATIONS
+// TOAST NOTIFICATIONS
 // ==============================================================
 
 export function showToast(message, type = "info", duration = 3000) {
-  const toast = document.createElement("div");
-  toast.className = `toast toast-${type}`;
-  toast.innerHTML = `
-    <i class="fas fa-${getToastIcon(type)}"></i>
-    <span>${message}</span>
-  `;
-
-  document.body.appendChild(toast);
-
-  // Trigger animation
-  setTimeout(() => toast.classList.add("show"), 10);
-
-  // Remove after duration
-  setTimeout(() => {
-    toast.classList.remove("show");
-    setTimeout(() => toast.remove(), 300);
-  }, duration);
-}
-
-function getToastIcon(type) {
   const icons = {
     success: "check-circle",
     error: "exclamation-circle",
     warning: "exclamation-triangle",
     info: "info-circle",
   };
-  return icons[type] || "info-circle";
-}
 
-// ==============================================================
-// EXPORTAR FUNCIONES PÚBLICAS
-// ==============================================================
+  const toast = document.createElement("div");
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `
+    <i class="fas fa-${icons[type] || "info-circle"}"></i>
+    <span>${message}</span>
+  `;
+
+  document.body.appendChild(toast);
+  setTimeout(() => toast.classList.add("show"), 10);
+  setTimeout(() => {
+    toast.classList.remove("show");
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+}
 
 export { openModal, closeModal, toggleModal };
