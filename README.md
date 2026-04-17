@@ -1,31 +1,25 @@
-# Geoportal Ambiental - Región de Murcia
+# Geoportal Ambiental — Región de Murcia
 
 Aplicación web interactiva para visualizar y analizar datos ambientales de la Región de Murcia.
 
-## 🌟 Características
+## Características
 
 - **Visualización de capas geográficas**: Árboles monumentales, vías pecuarias, espacios naturales protegidos (ENP, LIC/ZEC, ZEPA)
 - **Búsqueda de municipios**: Filtrado espacial por municipio con caché optimizado
-- **Dashboard de estadísticas**: Estadísticas precisas calculadas con PostGIS para cada municipio
+- **Dashboard de estadísticas**: Estadísticas calculadas con PostGIS para cada municipio (superficie, recuentos, porcentajes de protección)
 - **Detalles clickeables**: Click en cards de estadísticas para ver listas detalladas
-- **Búsqueda de elementos cercanos**: Encuentra elementos en un radio configurable
+- **Búsqueda de elementos cercanos**: Encuentra elementos en un radio configurable (clic derecho en el mapa)
 
-## 🌍 Demo en línea
-
-Puedes probar el geoportal directamente en:
+## Demo en línea
 
 🌐 [https://pedralcg.github.io/geoportal-rm/](https://pedralcg.github.io/geoportal-rm/)
 
-## 🔗 Fuentes de Datos
+## Fuentes de datos
 
 - **Coberturas (Capas)**: [Geocatálogo oficial de la Región de Murcia](https://murcianatural.carm.es/geocatalogo)
-- **Mapas Base**:
-  - OpenStreetMap
-  - Esri World Imagery
-  - CartoDB Light
-  - Esri World Street Map
+- **Mapas Base**: OpenStreetMap · Esri World Imagery · CartoDB Light · Esri World Street Map
 
-## 📁 Estructura del Proyecto
+## Estructura del proyecto
 
 ```
 geoportal-rm/
@@ -38,13 +32,18 @@ geoportal-rm/
 ├── ui.js                   # Componentes UI básicos
 ├── ui-integration.js       # Integración UI/Mapa
 ├── search.js               # Búsqueda de municipios
-├── advanced-features.js    # Funcionalidades avanzadas
-└── sql/                    # Funciones SQL
-    ├── municipality_statistics.sql  # Estadísticas por municipio
-    └── advanced_features.sql        # Búsqueda cercana, zonas protección
+├── advanced-features.js    # Stub — ver features/
+├── features/
+│   ├── stats.js            # Estadísticas por municipio
+│   ├── proximity.js        # Búsqueda de elementos cercanos y zonas de protección
+│   ├── activity-export.js  # Actividad reciente, exportación GeoJSON
+│   └── context-menu.js     # Menú contextual (clic derecho en el mapa)
+└── sql/
+    ├── municipality_statistics.sql  # Estadísticas por municipio (PostGIS)
+    └── advanced_features.sql        # Búsqueda cercana, zonas de protección
 ```
 
-## 🚀 Deploy
+## Deploy
 
 ### 1. Configurar Supabase
 
@@ -59,84 +58,48 @@ geoportal-rm/
    sql/municipality_statistics.sql
    ```
 
-### 2. Configurar Variables
+### 2. Configurar credenciales
 
-Edita `config.js` con tus credenciales:
+Edita `config.js` con tus credenciales de Supabase:
 
 ```javascript
 export const supabaseUrl = "TU_SUPABASE_URL";
 export const supabaseKey = "TU_SUPABASE_ANON_KEY";
 ```
 
+> La anon key de Supabase está diseñada para ser pública. La seguridad real se gestiona mediante Row Level Security (RLS) en Supabase.
+
 ### 3. Desplegar
 
-Sube los archivos a tu servidor web o usa servicios como:
+Sube los archivos a cualquier servidor web estático:
 
+- **GitHub Pages**: Activa Pages en la configuración del repositorio
 - **Netlify**: Arrastra la carpeta al dashboard
 - **Vercel**: Conecta el repositorio Git
-- **GitHub Pages**: Activa Pages en la configuración del repo
 
-## 🛠️ Tecnologías
+## Tecnologías
 
-- **Frontend**: HTML5, CSS3, JavaScript (ES6+)
-- **Mapa**: Leaflet.js
-- **Backend**: Supabase (PostgreSQL + PostGIS)
-- **Estilos**: CSS Variables, Grid, Flexbox
+- **Frontend**: HTML5, CSS3, JavaScript ES Modules (sin bundler)
+- **Mapa**: [Leaflet.js](https://leafletjs.com/) 1.9.4
+- **Backend/Base de datos**: [Supabase](https://supabase.com/) (PostgreSQL + PostGIS)
+- **Tipografía**: Inter (Google Fonts)
 
-## 📊 Funciones SQL
+## Funciones SQL (Supabase RPC)
 
-### `get_municipality_statistics(municipio)`
+| Función | Descripción |
+|---|---|
+| `get_municipality_statistics(p_municipality_name)` | Estadísticas completas de un municipio: superficie, árboles, vías pecuarias, ENP, LIC/ZEC, ZEPA |
+| `get_nearby_features(p_lat, p_lng, p_radius_meters, ...)` | Elementos de cualquier capa en un radio dado |
+| `get_protection_zones(p_lat, p_lng)` | Zonas de protección que contienen un punto |
+| `get_spatial_features(layer_name, geojson_filter)` | Filtrado espacial de capas por geometría |
+| `export_layer_geojson(p_layer_name, p_municipality)` | Exporta una capa a GeoJSON |
 
-Calcula estadísticas precisas usando intersecciones espaciales PostGIS:
+## Licencia
 
-- Superficie del municipio
-- Árboles monumentales (cantidad, densidad, lista)
-- Vías pecuarias (cantidad, longitud total, lista con longitudes)
-- Espacios protegidos (ENP, LIC/ZEC, ZEPA) con superficies y porcentajes
+MIT © [Pedro Alcoba Gómez](https://pedralcg.dev)
 
-### `get_nearby_features(lat, lng, radio)`
+## Contacto
 
-Busca elementos cercanos en un radio especificado.
-
-### `get_protection_zones(lat, lng)`
-
-Verifica zonas de protección en un punto.
-
-### `reverse_geocode(lat, lng)`
-
-Obtiene información del lugar (municipio, vía pecuaria y árbol más cercanos).
-
-## 📝 Licencia
-
-Este proyecto está bajo la Licencia **Creative Commons Atribución-NoComercial 4.0 Internacional (CC BY-NC 4.0)**.
-
-Esto significa que puedes:
-
-- **Compartir**: Copiar y redistribuir el material en cualquier medio o formato.
-- **Adaptar**: Remezclar, transformar y construir a partir del material.
-
-Bajo las siguientes condiciones:
-
-- **Atribución**: Debes dar crédito de manera adecuada, brindar un enlace a la licencia, e indicar si se han realizado cambios.
-- **NoComercial**: No puedes hacer uso del material con propósitos comerciales.
-
-Para ver una copia de esta licencia, visita [http://creativecommons.org/licenses/by-nc/4.0/](http://creativecommons.org/licenses/by-nc/4.0/) o consulta el archivo `LICENSE`.
-
-Para uso comercial, por favor contactar con el autor.
-
-## 👥 Contacto
-
-- 🌐 Web: [pedralcg.github.io](https://pedralcg.github.io)
-- 📧 Email: [pedralcg.dev@gmail.com](mailto:pedralcg.dev@gmail.com)
-- 👤 LinkedIn: [linkedin.com/in/pedro-alcoba-gomez](https://www.linkedin.com/in/pedro-alcoba-gomez)
-- 💾 Repositorios: [github.com/pedralcg](https://github.com/pedralcg?tab=repositories)
-
-## 🤝 Cómo colaborar
-
-Si te interesa colaborar en alguno de mis proyectos o quieres aportar ideas, puedes:
-
-- Abrir un issue en el repositorio correspondiente.
-- Enviar un pull request con mejoras o correcciones.
-- Contactarme directamente por [email](mailto:pedralcg.dev@gmail.com) o [LinkedIn](https://www.linkedin.com/in/pedro-alcoba-gomez) para propuestas de colaboración.
-
-Todas las contribuciones son bienvenidas, especialmente si te interesa SIG, teledetección o desarrollo web GIS.
+- 🌐 Web: [pedralcg.dev](https://pedralcg.dev)
+- 📧 Email: [pedro@pedralcg.dev](mailto:pedro@pedralcg.dev)
+- 💾 GitHub: [github.com/pedralcg](https://github.com/pedralcg)
