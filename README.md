@@ -1,5 +1,9 @@
 # Geoportal Ambiental — Región de Murcia
 
+![Geoportal Ambiental de la Región de Murcia con capas de espacios protegidos y municipios](https://res.cloudinary.com/dhnr62lyo/image/upload/w_1200,f_auto,q_auto/v1772720134/pedralcg.dev/projects/nqqzpwrtnomrac6ymjij.png)
+
+**[Ver la demo en vivo](https://pedralcg.github.io/geoportal-rm/)** · [Ficha del proyecto en pedralcg.dev](https://pedralcg.dev/projects/geoportal-ambiental-region-de-murcia)
+
 Aplicación web interactiva para visualizar y analizar datos ambientales de la Región de Murcia.
 
 ## Características
